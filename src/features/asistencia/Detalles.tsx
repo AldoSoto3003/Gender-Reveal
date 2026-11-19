@@ -19,8 +19,40 @@ const OPCIONES: { valor: Respuesta; texto: string }[] = [
   { valor: 'no', texto: 'No podré ir' },
 ];
 
+const plural = (n: number, uno: string, varios: string) => `${n} ${n === 1 ? uno : varios}`;
+
+function Contador({ etiqueta, ayuda, valor, onCambio }: { etiqueta: string; ayuda: string; valor: number; onCambio: (n: number) => void }) {
+  return (
+    <div className="ppl">
+      <div>
+        <span className="contador-t">{etiqueta}</span>
+        <span className="contador-a">{ayuda}</span>
+      </div>
+      <div className="step">
+        <button type="button" className="sb" aria-label={`${etiqueta}: uno menos`} disabled={valor <= 0} onClick={() => onCambio(Math.max(0, valor - 1))}>
+          −
+        </button>
+        <span className="cnt" aria-live="polite" aria-label={`${etiqueta}: ${valor}`}>
+          {valor}
+        </span>
+        <button type="button" className="sb" aria-label={`${etiqueta}: uno más`} disabled={valor >= 10} onClick={() => onCambio(Math.min(10, valor + 1))}>
+          +
+        </button>
+      </div>
+    </div>
+  );
+}
+
+/** "tú, 1 adulto y 2 niños" */
+export function desglose(adultos: number, ninos: number): string {
+  const partes = ['tú'];
+  if (adultos) partes.push(plural(adultos, 'adulto', 'adultos'));
+  if (ninos) partes.push(plural(ninos, 'niño', 'niños'));
+  return partes.length === 1 ? 'solo tú' : `${partes.slice(0, -1).join(', ')} y ${partes[partes.length - 1]}`;
+}
+
 function mensajeListo(a: MiAsistencia): string {
-  const gente = `${a.personas} ${a.personas === 1 ? 'persona' : 'personas'}`;
+  const gente = `${plural(a.personas, 'persona', 'personas')} (${desglose(a.adultos, a.ninos)})`;
   if (a.respuesta === 'si') return `¡Listo, ${a.nombre}! Te esperamos. Confirmaste ${gente}.`;
   if (a.respuesta === 'tal_vez')
     return `Gracias, ${a.nombre}. Te apartamos lugar para ${gente}. Cuando lo sepas, vuelve aquí y cambia tu respuesta.`;
@@ -33,7 +65,9 @@ export function Detalles({ evento, nombreSugerido }: { evento: Evento; nombreSug
   const [editando, setEditando] = useState(false);
   const [nombre, setNombre] = useState('');
   const [respuesta, setRespuesta] = useState<Respuesta | null>(null);
-  const [personas, setPersonas] = useState(1);
+  const [adultos, setAdultos] = useState(0);
+  const [ninos, setNinos] = useState(0);
+  const [acompanantes, setAcompanantes] = useState('');
   const [mensaje, setMensaje] = useState('');
   const [enviando, setEnviando] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -54,7 +88,9 @@ export function Detalles({ evento, nombreSugerido }: { evento: Evento; nombreSug
     if (mia) {
       setNombre(mia.nombre);
       setRespuesta(mia.respuesta);
-      setPersonas(Math.max(1, mia.personas));
+      setAdultos(mia.adultos);
+      setNinos(mia.ninos);
+      setAcompanantes(mia.acompanantes);
       setMensaje(mia.mensaje);
     }
     setEditando(true);
@@ -63,7 +99,16 @@ export function Detalles({ evento, nombreSugerido }: { evento: Evento; nombreSug
   async function enviar(e: FormEvent) {
     e.preventDefault();
     if (!nombre.trim() || !respuesta) return;
-    const datos: MiAsistencia = { nombre: nombre.trim(), respuesta, personas: respuesta === 'no' ? 0 : personas, mensaje: mensaje.trim() };
+    const viene = respuesta !== 'no';
+    const datos: MiAsistencia = {
+      nombre: nombre.trim(),
+      respuesta,
+      adultos: viene ? adultos : 0,
+      ninos: viene ? ninos : 0,
+      acompanantes: viene ? acompanantes.trim() : '',
+      personas: viene ? 1 + adultos + ninos : 0,
+      mensaje: mensaje.trim(),
+    };
     setEnviando(true);
     setError(null);
     try {
@@ -160,22 +205,30 @@ export function Detalles({ evento, nombreSugerido }: { evento: Evento; nombreSug
                   ))}
                 </div>
                 {respuesta && respuesta !== 'no' && (
-                  <div className="ppl">
-                    <span className="lbl" style={{ margin: 0 }}>
-                      {respuesta === 'si' ? '¿Cuántas personas vienen, contándote a ti?' : '¿Cuántas personas vendrían, contándote a ti?'}
-                    </span>
-                    <div className="step">
-                      <button type="button" className="sb" aria-label="Una persona menos" disabled={personas <= 1} onClick={() => setPersonas((p) => Math.max(1, p - 1))}>
-                        −
-                      </button>
-                      <span className="cnt" aria-live="polite">
-                        {personas}
-                      </span>
-                      <button type="button" className="sb" aria-label="Una persona más" disabled={personas >= 8} onClick={() => setPersonas((p) => Math.min(8, p + 1))}>
-                        +
-                      </button>
-                    </div>
-                  </div>
+                  <fieldset className="acomp">
+                    <legend className="dk acomp-h">{respuesta === 'si' ? '¿Quién viene contigo?' : '¿Quién vendría contigo?'}</legend>
+                    <Contador etiqueta="Adultos" ayuda="Además de ti, por ejemplo tu pareja" valor={adultos} onCambio={setAdultos} />
+                    <Contador etiqueta="Niños" ayuda="Bebés y niños de cualquier edad" valor={ninos} onCambio={setNinos} />
+                    {adultos + ninos > 0 && (
+                      <div className="acomp-nombres">
+                        <label className="lbl" htmlFor="ra">
+                          Sus nombres (opcional)
+                        </label>
+                        <input
+                          className="in"
+                          id="ra"
+                          type="text"
+                          maxLength={300}
+                          placeholder="Por ejemplo, Ana, Pablo y Lucía"
+                          value={acompanantes}
+                          onChange={(e) => setAcompanantes(e.target.value)}
+                        />
+                      </div>
+                    )}
+                    <p className="acomp-total" aria-live="polite">
+                      Total: <strong>{1 + adultos + ninos}</strong> {1 + adultos + ninos === 1 ? 'persona' : 'personas'} ({desglose(adultos, ninos)})
+                    </p>
+                  </fieldset>
                 )}
                 <div className="rsvp-msg">
                   <label className="lbl" htmlFor="rm">

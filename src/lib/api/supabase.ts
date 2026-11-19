@@ -78,7 +78,9 @@ export function crearApiSupabase(url: string, anonKey: string, eventoId: string)
           p_device: dev(),
           p_nombre: a.nombre,
           p_respuesta: a.respuesta,
-          p_personas: a.personas,
+          p_adultos: a.adultos,
+          p_ninos: a.ninos,
+          p_acompanantes: a.acompanantes,
           p_mensaje: a.mensaje,
         }),
       );
@@ -117,16 +119,10 @@ export function crearApiSupabase(url: string, anonKey: string, eventoId: string)
         .on('postgres_changes', { event: '*', schema: 'public', table: 'eventos', filter: `id=eq.${eventoId}` }, () =>
           alCambiar('eventos'),
         )
-        .on(
-          'postgres_changes',
-          { event: '*', schema: 'public', table: 'predicciones', filter: `evento_id=eq.${eventoId}` },
-          () => alCambiar('predicciones'),
-        )
-        .on(
-          'postgres_changes',
-          { event: '*', schema: 'public', table: 'fotos_recuerdos', filter: `evento_id=eq.${eventoId}` },
-          () => alCambiar('fotos_recuerdos'),
-        )
+        // Sin filtro por evento_id: Supabase no entrega los DELETE en suscripciones filtradas.
+        // Al recibir cualquier cambio se vuelve a consultar, así que no importa de qué evento venga.
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'predicciones' }, () => alCambiar('predicciones'))
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'fotos_recuerdos' }, () => alCambiar('fotos_recuerdos'))
         .subscribe();
       return () => {
         void sb.removeChannel(canal);
@@ -163,7 +159,7 @@ export function crearApiSupabase(url: string, anonKey: string, eventoId: string)
       return revisar(
         await sb
           .from('asistencias')
-          .select('id, nombre, respuesta, personas, mensaje, creado_en, actualizado_en')
+          .select('id, nombre, respuesta, personas, adultos, ninos, acompanantes, mensaje, creado_en, actualizado_en')
           .eq('evento_id', eventoId)
           .order('actualizado_en', { ascending: false }),
       ) as Asistencia[];

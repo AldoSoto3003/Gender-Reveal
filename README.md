@@ -17,7 +17,7 @@ Nadie conoce el resultado antes de la fiesta, ni siquiera los papás. Un **guard
 
 - **Frontend:** React 18 + TypeScript + Vite
 - **Backend:** Supabase (Postgres, Realtime, Storage, Auth)
-- **Hosting:** VPS propio (Ubuntu + Nginx) en **https://revelacion.aldosoto.dev**, con despliegue automático desde GitHub Actions
+- **Hosting:** VPS propio (Ubuntu + Nginx) en **https://revelacion.aldosoto.dev**; se clona y compila en el VPS (`./deploy/actualizar.sh`)
 - **Datos:** Supabase Cloud (plan gratuito al inicio)
 
 El porqué de cada decisión está en [docs/02-arquitectura.md](docs/02-arquitectura.md).
@@ -29,7 +29,7 @@ El porqué de cada decisión está en [docs/02-arquitectura.md](docs/02-arquitec
 3. [Modelo de datos](docs/03-modelo-de-datos.md): tablas, reglas de acceso (RLS) y funciones.
 4. [Diseño](docs/04-diseno.md): colores, tipografía, componentes y animaciones.
 5. [Plan de trabajo](docs/05-plan-de-trabajo.md): etapas y fechas hasta el 16 de enero.
-6. [Despliegue](docs/06-despliegue.md): DNS, Nginx, HTTPS y GitHub Actions hacia el VPS.
+6. [Despliegue](docs/06-despliegue.md): DNS, clonar en el VPS, Nginx, HTTPS y cómo actualizar.
 
 ## Diseño de referencia
 
@@ -48,7 +48,7 @@ npm install
 npm run dev
 ```
 
-Abre http://localhost:5173.
+Abre http://localhost:5190.
 
 ### Modo demo
 
@@ -94,8 +94,7 @@ src/
 ├── lib/api/              Contrato de datos: Supabase y modo demo
 └── styles/               CSS base, invitación y panel
 supabase/                 Migración SQL y datos iniciales
-deploy/nginx/             Configuración de Nginx
-.github/workflows/        Despliegue automático al VPS
+deploy/                   Nginx y script para actualizar en el VPS
 ```
 
 ## Datos pendientes

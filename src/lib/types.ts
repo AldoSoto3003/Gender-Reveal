@@ -41,7 +41,13 @@ export interface Asistencia {
   id: string;
   nombre: string;
   respuesta: Respuesta;
+  /** Total que viene: 1 (quien confirma) + adultos + niños; 0 si no viene */
   personas: number;
+  /** Adultos que acompañan a quien confirma */
+  adultos: number;
+  ninos: number;
+  /** Nombres de los acompañantes (texto libre, opcional) */
+  acompanantes: string;
   mensaje: string;
   creado_en: string;
   actualizado_en: string;
@@ -50,6 +56,10 @@ export interface Asistencia {
 export interface MiAsistencia {
   nombre: string;
   respuesta: Respuesta;
+  adultos: number;
+  ninos: number;
+  acompanantes: string;
+  /** Calculado: 1 + adultos + niños (0 si no viene) */
   personas: number;
   mensaje: string;
 }

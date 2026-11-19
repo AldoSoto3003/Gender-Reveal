@@ -53,7 +53,7 @@ Una sola página con scroll. Las secciones van en este orden.
 - **Confirma tu asistencia:**
   - Nombre (se llena solo si ya votó).
   - ¿Vienes? **Sí, ahí estaré**, **Aún no lo sé** o **No podré ir**.
-  - Si viene o aún no sabe: número de personas contándose a sí mismo, de 1 a 8.
+  - Si viene o aún no sabe: **¿Quién viene contigo?** con contadores de adultos (además de él) y niños, y los nombres de los acompañantes (opcional). Se muestra el total, por ejemplo "4 personas (tú, 1 adulto y 2 niños)".
   - Con "Aún no lo sé" se muestra: "Te apartamos lugar para N personas. Cuando lo sepas, vuelve aquí y cambia tu respuesta".
   - Mensaje para los papás (opcional).
   - Al enviar: "¡Listo, Ana! Te esperamos. Confirmaste 3 personas." con opción de **Cambiar mi respuesta**.
@@ -81,7 +81,7 @@ Acceso con link mágico al correo de cualquiera de los dos papás. En el celular
 | Sección | Contenido |
 |---|---|
 | Resumen | Personas que vienen, cuántos no podrán ir, número de predicciones, fotos del día, últimas confirmaciones y barra niña/niño |
-| Confirmaciones | Lista con nombre, respuesta, personas, mensaje y fecha. Filtros (todas, vienen, tal vez, no vienen), búsqueda por nombre, total de personas y descarga en Excel o CSV |
+| Confirmaciones | Lista con nombre, respuesta, total de personas, acompañantes (adultos, niños y nombres), mensaje y fecha. Filtros (todas, vienen, tal vez, no vienen), búsqueda por nombre, total de personas y descarga en Excel o CSV |
 | Datos del evento | Fecha, hora, lugar, dirección y nota. Vista previa de la tarjeta y links de mapas generados con botón para probarlos |
 | Nuestra historia | Subir fotos (JPG, PNG o HEIC), editar títulos, reordenar y quitar |
 | Recuerdos del día | Interruptores para mostrar la galería y para permitir fotos de invitados. Fotos por aprobar y publicadas |

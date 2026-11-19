@@ -63,7 +63,10 @@ eventos 1 ─── 1 resultado_sellado        (privada, sin lectura)
 | `device_hash` | `text` | Hash del `device_id`; único por evento |
 | `nombre` | `text` | |
 | `respuesta` | `text` | `'si'`, `'tal_vez'` (aún no lo sabe) o `'no'` |
-| `personas` | `smallint` | 1 a 8 si es `si` o `tal_vez`; 0 si es `no` |
+| `adultos` | `smallint` | Adultos que acompañan a quien confirma (0 a 10) |
+| `ninos` | `smallint` | Niños que lo acompañan (0 a 10) |
+| `acompanantes` | `text` | Nombres de los acompañantes, opcional |
+| `personas` | `smallint` | `1 + adultos + ninos` si es `si` o `tal_vez`; 0 si es `no` (lo calcula la función) |
 | `mensaje` | `text` | Opcional, máximo 500 caracteres |
 | `creado_en`, `actualizado_en` | `timestamptz` | |
 
@@ -126,7 +129,7 @@ Todas son `security definer`, validan sus datos y fijan `search_path`.
 |---|---|---|
 | `guardar_prediccion(evento, device, nombre, prediccion, peso)` | Invitado | *Upsert* por `device_id`. Falla si el evento ya se reveló |
 | `borrar_prediccion(evento, device)` | Invitado | Para "Cambiar mi predicción" |
-| `guardar_asistencia(evento, device, nombre, respuesta, personas, mensaje)` | Invitado | *Upsert* por `device_id` |
+| `guardar_asistencia(evento, device, nombre, respuesta, adultos, ninos, acompanantes, mensaje)` | Invitado | *Upsert* por `device_id` |
 | `mi_asistencia(evento, device)` | Invitado | Devuelve su propia respuesta para mostrarla al volver |
 | `registrar_foto_recuerdo(evento, device, nombre, ruta)` | Invitado | Crea la foto como `pendiente` si el evento lo permite |
 | `sellar_resultado(token, pin, resultado)` | Guardián | Guarda o corrige el resultado hasta 24 horas antes del evento |
@@ -162,6 +165,8 @@ end $$;
 2. Corre [`supabase/seed.sql`](../supabase/seed.sql): crea el evento real y uno de prueba (`es_prueba = true`, se puede reiniciar para ensayar).
 3. Cada papá entra una vez a `/panel` con su correo para que exista su usuario.
 4. Corre el `insert into admins` que está comentado al final de `seed.sql`, con sus correos.
+
+> Permisos: los proyectos nuevos de Supabase ya no dan acceso automático a las tablas. La migración [`20261120000100_permisos.sql`](../supabase/migrations/20261120000100_permisos.sql) otorga los `GRANT` necesarios a `anon` y `authenticated`; las políticas RLS siguen decidiendo qué filas ve cada quien.
 
 > Nota de implementación: en la base de datos no se guarda el `device_id` del invitado, sino su hash SHA-256 (`device_hash`). Así, aunque las predicciones son de lectura pública, nadie puede usar ese valor para cambiar el voto de otra persona.
 

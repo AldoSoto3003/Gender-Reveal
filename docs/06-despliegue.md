@@ -1,11 +1,10 @@
 # Despliegue
 
-La página se compila en GitHub Actions y se sube a tu VPS (Ubuntu + Nginx). Los datos viven en Supabase Cloud.
+Sin CI/CD: el repo se clona en el VPS, se compila ahí y Nginx sirve la carpeta `dist/`. Los datos viven en Supabase Cloud.
 
 - **URL:** https://revelacion.aldosoto.dev
-- **Carpeta en el VPS:** `/var/www/revelacion`
-  - `releases/<commit>/`: cada versión publicada
-  - `current`: enlace a la versión activa (Nginx sirve esta)
+- **Repo en el VPS:** `/var/www/gender-reveal` (Nginx sirve `/var/www/gender-reveal/dist`)
+- **Requisitos en el VPS:** Ubuntu con Nginx, git y Node 20 o más reciente
 
 ## 1. DNS
 
@@ -22,36 +21,65 @@ Comprueba con:
 dig +short revelacion.aldosoto.dev
 ```
 
-## 2. Preparar el VPS (una sola vez)
+## 2. Clonar el repo (una sola vez)
 
-Usuario para desplegar, sin contraseña:
+Si el repo es privado, genera una llave en el VPS y agrégala en GitHub como *Deploy key* de solo lectura (*Settings → Deploy keys*):
 
 ```bash
-sudo adduser --disabled-password --gecos "" deploy
+ssh-keygen -t ed25519 -f ~/.ssh/gender_reveal -C "vps gender-reveal" -N ""
 ```
 
 ```bash
-sudo mkdir -p /var/www/revelacion/releases && sudo chown -R deploy:deploy /var/www/revelacion
+cat ~/.ssh/gender_reveal.pub
 ```
 
-Genera en tu computadora una llave solo para el despliegue:
+Clona usando esa llave:
 
 ```bash
-ssh-keygen -t ed25519 -f ~/.ssh/revelacion_deploy -C "deploy revelacion" -N ""
+sudo mkdir -p /var/www && sudo chown "$USER" /var/www
 ```
 
-Copia la llave pública (`~/.ssh/revelacion_deploy.pub`) a `/home/deploy/.ssh/authorized_keys` en el VPS. La llave privada va como secreto en GitHub (paso 4).
+```bash
+GIT_SSH_COMMAND="ssh -i ~/.ssh/gender_reveal" git clone git@github.com:AldoSoto3003/Gender-Reveal.git /var/www/gender-reveal
+```
 
-## 3. Nginx y HTTPS
+```bash
+cd /var/www/gender-reveal && git config core.sshCommand "ssh -i ~/.ssh/gender_reveal"
+```
+
+Crea el archivo de variables (no se versiona) con los valores de Supabase:
+
+```bash
+cp .env.example .env.local && nano .env.local
+```
+
+| Variable | Valor |
+|---|---|
+| `VITE_SUPABASE_URL` | `https://zfgauxphwnmqqnfbeyjh.supabase.co` |
+| `VITE_SUPABASE_ANON_KEY` | Llave `anon` (la misma de tu `.env.local` local) |
+| `VITE_EVENT_ID` | `6f1c2a8e-0b7d-4c1e-9a55-2d3f7e8b1c01` |
+
+Primer build:
+
+```bash
+./deploy/actualizar.sh
+```
+
+## 3. Nginx y HTTPS (una sola vez)
 
 Los dominios `.dev` **solo funcionan con HTTPS**: sin certificado, el navegador ni siquiera abre la página.
 
-1. Copia [`deploy/nginx/revelacion.aldosoto.dev.conf`](../deploy/nginx/revelacion.aldosoto.dev.conf) a `/etc/nginx/sites-available/`.
-2. Actívalo y recarga Nginx:
+1. Copia la configuración y el bloque de encabezados que trae comentado al final:
+
+```bash
+sudo cp deploy/nginx/revelacion.aldosoto.dev.conf /etc/nginx/sites-available/
+```
 
 ```bash
 sudo ln -s /etc/nginx/sites-available/revelacion.aldosoto.dev.conf /etc/nginx/sites-enabled/
 ```
+
+2. Crea `/etc/nginx/snippets/revelacion-headers.conf` con las líneas comentadas al final de ese archivo, revisa y recarga:
 
 ```bash
 sudo nginx -t && sudo systemctl reload nginx
@@ -65,50 +93,57 @@ sudo certbot --nginx -d revelacion.aldosoto.dev
 
 El certificado se renueva solo con el temporizador de `certbot`.
 
-## 4. GitHub Actions
+## 4. Actualizar
 
-El flujo [`.github/workflows/deploy.yml`](../.github/workflows/deploy.yml) corre en cada push a `main`: instala, revisa tipos, compila y sube `dist/` con `rsync`. Luego cambia el enlace `current` y conserva las últimas 5 versiones.
-
-Secretos del repositorio (*Settings → Secrets and variables → Actions*):
-
-| Secreto | Valor |
-|---|---|
-| `VPS_HOST` | IP o dominio del VPS |
-| `VPS_USER` | `deploy` |
-| `VPS_SSH_KEY` | Contenido de `~/.ssh/revelacion_deploy` (llave privada) |
-| `VITE_SUPABASE_URL` | URL del proyecto de Supabase |
-| `VITE_SUPABASE_ANON_KEY` | Llave `anon` de Supabase |
-| `VITE_EVENT_ID` | ID del evento (ver modelo de datos) |
-
-## 5. Volver a una versión anterior
+Cada vez que subas cambios a GitHub, en el VPS:
 
 ```bash
-ls -1t /var/www/revelacion/releases
+cd /var/www/gender-reveal && ./deploy/actualizar.sh
 ```
+
+El script hace `git pull`, `npm ci`, revisa tipos y compila en una carpeta aparte. Al terminar, la cambia por `dist/` de golpe, así nadie ve una versión a medio compilar. No hace falta recargar Nginx.
+
+## 5. Volver a la versión anterior
+
+El script guarda la versión previa en `.dist-anterior`:
 
 ```bash
-ln -sfn /var/www/revelacion/releases/<commit-anterior> /var/www/revelacion/current
+cd /var/www/gender-reveal && rm -rf dist && mv .dist-anterior dist
 ```
-
-No hace falta recargar Nginx.
 
 ## 6. Supabase
 
-1. Crea el proyecto en https://supabase.com (región `us-east-1` o la más cercana).
-2. Corre la migración de [`supabase/migrations`](../supabase/migrations) en el SQL Editor, o con la CLI:
+Proyecto actual: `zfgauxphwnmqqnfbeyjh` (región `us-west-2`), ya vinculado con la CLI.
+
+1. Inicia sesión y vincula (solo la primera vez en cada computadora):
 
 ```bash
-npx supabase db push
+npx supabase login
 ```
 
-3. En *Authentication → URL Configuration*:
-   - **Site URL:** `https://revelacion.aldosoto.dev`
-   - **Redirect URLs:** `https://revelacion.aldosoto.dev/panel` y `http://localhost:5173/panel`
-4. Crea el evento y da de alta a los papás como admins (ver [03-modelo-de-datos.md](03-modelo-de-datos.md#alta-del-evento-y-los-admins)).
+```bash
+npx supabase link --project-ref zfgauxphwnmqqnfbeyjh
+```
+
+2. Sube migraciones nuevas:
+
+```bash
+npx supabase db push --linked
+```
+
+3. Las URLs de login (*Site URL* y *Redirect URLs*) viven en [`supabase/config.toml`](../supabase/config.toml). Para aplicar cambios, revisa primero la comparación que muestra el comando y confirma solo lo que esperas:
+
+```bash
+npx supabase config push
+```
+
+4. Da de alta a los papás como admins (ver [03-modelo-de-datos.md](03-modelo-de-datos.md#alta-del-evento-y-los-admins)).
+
+**Correos de login:** el servidor de correo incluido en Supabase solo envía a miembros del equipo de la organización y con un límite bajo por hora. Invita a los dos papás a la organización en Supabase, o configura un SMTP propio (por ejemplo, Resend) en *Authentication → Emails → SMTP*.
 
 ## 7. Evitar que Supabase pause el proyecto
 
-El plan gratuito pausa proyectos sin actividad por 7 días. Agrega en el VPS un cron semanal (`crontab -e` con el usuario `deploy`):
+El plan gratuito pausa proyectos sin actividad por 7 días. Agrega en el VPS un cron semanal (`crontab -e`):
 
 ```text
 0 9 * * 1 curl -s "https://<proyecto>.supabase.co/rest/v1/eventos?select=id&limit=1" -H "apikey: <ANON_KEY>" > /dev/null

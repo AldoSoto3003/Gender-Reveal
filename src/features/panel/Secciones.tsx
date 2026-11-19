@@ -17,8 +17,25 @@ function totales(a: Asistencia[]) {
   const si = a.filter((x) => x.respuesta === 'si');
   const tv = a.filter((x) => x.respuesta === 'tal_vez');
   const no = a.filter((x) => x.respuesta === 'no');
-  const suma = (xs: Asistencia[]) => xs.reduce((s, x) => s + x.personas, 0);
-  return { si, tv, no, personas: suma(si), posibles: suma(tv) };
+  const suma = (xs: Asistencia[], k: 'personas' | 'adultos' | 'ninos') => xs.reduce((s, x) => s + x[k], 0);
+  return {
+    si,
+    tv,
+    no,
+    personas: suma(si, 'personas'),
+    // adultos = quienes confirman + adultos que los acompañan
+    adultos: si.length + suma(si, 'adultos'),
+    ninos: suma(si, 'ninos'),
+    posibles: suma(tv, 'personas'),
+  };
+}
+
+/** "1 adulto y 2 niños" (solo acompañantes) */
+function quienesVienen(a: Asistencia): string {
+  const p: string[] = [];
+  if (a.adultos) p.push(`${a.adultos} ${a.adultos === 1 ? 'adulto' : 'adultos'}`);
+  if (a.ninos) p.push(`${a.ninos} ${a.ninos === 1 ? 'niño' : 'niños'}`);
+  return p.join(' y ');
 }
 
 function iniciales(n: string) {
@@ -53,7 +70,9 @@ export function Resumen({ d, irA }: { d: DatosPanel; irA: (t: string) => void })
         <div className="card stat">
           <p className="k">Personas que vienen</p>
           <p className="v">{t.personas}</p>
-          <p className="s">{t.si.length} confirmaciones</p>
+          <p className="s">
+            {t.adultos} adultos y {t.ninos} niños
+          </p>
         </div>
         <div className="card stat">
           <p className="k">Tal vez</p>
@@ -132,8 +151,10 @@ export function Resumen({ d, irA }: { d: DatosPanel; irA: (t: string) => void })
 function exportarCsv(filas: Asistencia[]) {
   const esc = (v: string | number) => `"${String(v).replace(/"/g, '""')}"`;
   const lineas = [
-    ['Nombre', 'Respuesta', 'Personas', 'Mensaje', 'Fecha'].map(esc).join(','),
-    ...filas.map((a) => [a.nombre, ETIQUETA[a.respuesta], a.personas, a.mensaje, fechaHoraCorta(a.actualizado_en)].map(esc).join(',')),
+    ['Nombre', 'Respuesta', 'Total personas', 'Adultos acompañantes', 'Niños', 'Nombres de acompañantes', 'Mensaje', 'Fecha'].map(esc).join(','),
+    ...filas.map((a) =>
+      [a.nombre, ETIQUETA[a.respuesta], a.personas, a.adultos, a.ninos, a.acompanantes, a.mensaje, fechaHoraCorta(a.actualizado_en)].map(esc).join(','),
+    ),
   ];
   // BOM para que Excel respete los acentos
   const blob = new Blob(['﻿' + lineas.join('\r\n')], { type: 'text/csv;charset=utf-8' });
@@ -198,6 +219,7 @@ export function Confirmaciones({ d, avisar }: Pick<Props, 'd' | 'avisar'>) {
           <span>Nombre</span>
           <span>Respuesta</span>
           <span>Personas</span>
+          <span>Acompañantes</span>
           <span>Mensaje</span>
           <span>Fecha</span>
         </div>
@@ -207,7 +229,17 @@ export function Confirmaciones({ d, avisar }: Pick<Props, 'd' | 'avisar'>) {
             <span>
               <span className={`pill ${PILL[a.respuesta]}`}>{ETIQUETA[a.respuesta]}</span>
             </span>
-            <span>{a.respuesta === 'no' ? '—' : a.personas}</span>
+            <span className="tot">{a.respuesta === 'no' ? '—' : a.personas}</span>
+            <span className="acp">
+              {a.respuesta === 'no' || a.personas <= 1 ? (
+                <span className="muted">{a.respuesta === 'no' ? '—' : 'Viene sola(o)'}</span>
+              ) : (
+                <>
+                  <span>{quienesVienen(a)}</span>
+                  {a.acompanantes && <span className="acp-n">{a.acompanantes}</span>}
+                </>
+              )}
+            </span>
             <span className="msg">{a.mensaje || '—'}</span>
             <span className="when">{fechaHoraCorta(a.actualizado_en)}</span>
           </div>

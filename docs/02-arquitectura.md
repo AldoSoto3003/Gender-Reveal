@@ -9,7 +9,7 @@
 | Lógica de servidor | Funciones SQL (`security definer`) llamadas por RPC | Las reglas sensibles (votar, confirmar, sellar, revelar) viven en la base de datos y no se pueden saltar desde el navegador |
 | 3D del sobre | CSS 3D (`perspective`, `preserve-3d`) | Funciona fluido en celulares viejos y en el navegador interno de WhatsApp, sin cargar 600 KB de Three.js |
 | Acuarela y papel | SVG con filtros (`feTurbulence`, `feDiffuseLighting`) | Se ve realista, escala sin pixelarse y pesa poco. Si el rendimiento falla en algún celular, se cambia por PNG pre-renderizados |
-| Hosting de la página | VPS propio (Ubuntu + Nginx) en `revelacion.aldosoto.dev` | El VPS y el dominio ya existen. La página es estática, así que Nginx solo sirve archivos |
+| Hosting de la página | VPS propio (Ubuntu + Nginx) en `revelacion.aldosoto.dev`, sin CI/CD | El VPS y el dominio ya existen. La página es estática: se clona, se compila en el VPS y Nginx sirve `dist/` |
 | Datos | Supabase Cloud | La base de datos y el tiempo real deben ser confiables el día del evento; no conviene mantenerlos nosotros en el VPS para un evento único |
 
 ## Estructura del repositorio
@@ -109,7 +109,7 @@ No hay cuentas. Al primer uso se genera un `device_id` (UUID) que se guarda en `
 ## Despliegue
 
 ```text
-push a main ─► GitHub Actions ─► npm run build ─► rsync de dist/ al VPS ─► Nginx sirve revelacion.aldosoto.dev
+git push ─► en el VPS: ./deploy/actualizar.sh (git pull + npm ci + build) ─► Nginx sirve dist/ en revelacion.aldosoto.dev
                                                                                   │
                                                          el navegador habla directo con Supabase Cloud
 ```

@@ -9,16 +9,14 @@ import { Celebracion } from '../features/revelacion/Celebracion';
 import { Recuerdos } from '../features/recuerdos/Recuerdos';
 import { useInvitacion } from '../hooks/useInvitacion';
 import { api } from '../lib/api';
-import { guardarLocal, leerLocal } from '../lib/device';
 import type { MiPrediccion } from '../lib/types';
 import '../styles/invitacion.css';
-
-const ABIERTO = 'revelacion.abierto';
 
 export function Invitacion() {
   const { evento, predicciones, historia, recuerdos, error } = useInvitacion();
   const [mia, setMia] = useState<MiPrediccion | null>(null);
-  const [yaAbierto] = useState(() => leerLocal<boolean>(ABIERTO, false));
+  // El resto de la invitación solo existe después de abrir el sobre.
+  const [abierto, setAbierto] = useState(false);
   const [reinicio, setReinicio] = useState(0);
   const [fiesta, setFiesta] = useState(false);
   const estadoPrevio = useRef<string | null>(null);
@@ -62,7 +60,8 @@ export function Invitacion() {
           Modo demo: los datos se guardan solo en este navegador. <a href="/panel">Abrir el panel</a>
         </p>
       )}
-      <EscenaSobre evento={evento} yaAbierto={yaAbierto} onAbierto={() => guardarLocal(ABIERTO, true)} reinicio={reinicio} />
+      <EscenaSobre evento={evento} onAbierto={() => setAbierto(true)} reinicio={reinicio} />
+      {abierto && (
       <main className="page">
         <svg className="paper" aria-hidden="true">
           <rect width="100%" height="100%" filter="url(#paperLit)" />
@@ -79,7 +78,8 @@ export function Invitacion() {
             type="button"
             className="lnk"
             onClick={() => {
-              window.scrollTo({ top: 0, behavior: 'smooth' });
+              window.scrollTo({ top: 0 });
+              setAbierto(false);
               setReinicio((n) => n + 1);
             }}
           >
@@ -87,6 +87,7 @@ export function Invitacion() {
           </button>
         </footer>
       </main>
+      )}
       {fiesta && evento.resultado && (
         <Celebracion
           sexo={evento.resultado}

@@ -6,7 +6,7 @@ Hoy es el 19 de noviembre de 2026 y la fiesta es el **sábado 16 de enero de 202
 
 | # | Etapa | Fechas | Entregable |
 |---|---|---|---|
-| 0 | Preparación | 20 al 23 nov | Repositorio, Vite, proyecto de Supabase, Nginx con HTTPS y despliegue automático al VPS |
+| 0 | Preparación | 20 al 23 nov | Repositorio, Vite, proyecto de Supabase, repo clonado en el VPS y Nginx con HTTPS |
 | 1 | Invitación visual | 24 al 29 nov | Escena del sobre, tarjeta y todas las secciones con datos fijos |
 | 2 | Datos reales | 30 nov al 3 dic | Migraciones, RLS, funciones, predicciones y confirmaciones funcionando |
 | 3 | Panel básico | 3 al 6 dic | Login, confirmaciones con exportación y datos del evento |
@@ -26,7 +26,7 @@ Las etapas 5 y 6 pueden salir después de mandar la invitación: los invitados v
 - [ ] ESLint, Prettier y `tsc --noEmit` en CI
 - [ ] Proyecto de Supabase y `.env.example`
 - [ ] Registro DNS de `revelacion.aldosoto.dev`, Nginx y certificado HTTPS
-- [ ] Despliegue automático al VPS con GitHub Actions (ver [06-despliegue.md](06-despliegue.md))
+- [ ] Clonar el repo en el VPS y compilar con `./deploy/actualizar.sh` (ver [06-despliegue.md](06-despliegue.md))
 
 ## Etapa 1: invitación visual
 

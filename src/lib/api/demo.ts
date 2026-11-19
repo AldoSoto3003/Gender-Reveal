@@ -18,7 +18,7 @@ interface Estado {
   sello: { resultado: Sexo | null; token: string; pin: string; sellado_en: string | null };
 }
 
-const KEY = 'revelacion.demo.v1';
+const KEY = 'revelacion.demo.v2';
 const ahora = () => new Date().toISOString();
 const id = () => Math.random().toString(36).slice(2, 10);
 
@@ -27,8 +27,10 @@ function inicial(): Estado {
   const pred = (nombre: string, p: Sexo, h: number) => ({
     id: id(), nombre, prediccion: p, creado_en: hace(h), device: id(), peso_kg: null,
   });
-  const asis = (nombre: string, respuesta: Respuesta, personas: number, mensaje: string, h: number) => ({
-    id: id(), nombre, respuesta, personas, mensaje, creado_en: hace(h), actualizado_en: hace(h), device: id(),
+  const asis = (nombre: string, respuesta: Respuesta, adultos: number, ninos: number, acompanantes: string, mensaje: string, h: number) => ({
+    id: id(), nombre, respuesta, adultos, ninos, acompanantes,
+    personas: respuesta === 'no' ? 0 : 1 + adultos + ninos,
+    mensaje, creado_en: hace(h), actualizado_en: hace(h), device: id(),
   });
   return {
     evento: {
@@ -52,12 +54,12 @@ function inicial(): Estado {
       pred('Sofía', 'nina', 18), pred('Tío Beto', 'nino', 10), pred('Paty', 'nina', 4),
     ],
     asistencias: [
-      asis('Tía Lupita', 'si', 3, '¡No me lo pierdo por nada!', 50),
-      asis('Abuela Tere', 'si', 2, 'Ahí estaremos con el abuelo.', 46),
-      asis('Carlos Ruiz', 'si', 4, '', 33),
-      asis('Ximena Paz', 'no', 0, 'Estaré de viaje, ¡mándenme fotos!', 22),
-      asis('Memo Díaz', 'tal_vez', 2, 'Depende del trabajo, les aviso.', 12),
-      asis('Paty Herrera', 'si', 3, 'Llevo el postre.', 4),
+      asis('Tía Lupita', 'si', 1, 1, 'Jorge y Emilia', '¡No me lo pierdo por nada!', 50),
+      asis('Abuela Tere', 'si', 1, 0, 'El abuelo Rafa', 'Ahí estaremos con el abuelo.', 46),
+      asis('Carlos Ruiz', 'si', 1, 2, 'Ana, Pablo y Lucía', '', 33),
+      asis('Ximena Paz', 'no', 0, 0, '', 'Estaré de viaje, ¡mándenme fotos!', 22),
+      asis('Memo Díaz', 'tal_vez', 1, 0, '', 'Depende del trabajo, les aviso.', 12),
+      asis('Paty Herrera', 'si', 0, 2, 'Mis hijos', 'Llevo el postre.', 4),
     ],
     historia: [
       { id: id(), url: '', ruta: '', titulo: 'Primera ecografía', tipo: 'ecografia', posicion: 0 },
@@ -141,15 +143,21 @@ export function crearApiDemo(): Api {
     },
     async miAsistencia() {
       const a = s.asistencias.find((x) => x.device === dev());
-      return a ? { nombre: a.nombre, respuesta: a.respuesta, personas: a.personas, mensaje: a.mensaje } : null;
+      return a
+        ? { nombre: a.nombre, respuesta: a.respuesta, adultos: a.adultos, ninos: a.ninos, acompanantes: a.acompanantes, personas: a.personas, mensaje: a.mensaje }
+        : null;
     },
     async guardarAsistencia(a) {
       await espera();
       const fila = s.asistencias.find((x) => x.device === dev());
+      const viene = a.respuesta !== 'no';
       const datos = {
         nombre: a.nombre.trim(),
         respuesta: a.respuesta,
-        personas: a.respuesta === 'no' ? 0 : a.personas,
+        adultos: viene ? a.adultos : 0,
+        ninos: viene ? a.ninos : 0,
+        acompanantes: viene ? a.acompanantes.trim() : '',
+        personas: viene ? 1 + a.adultos + a.ninos : 0,
         mensaje: a.mensaje.trim(),
       };
       if (fila) Object.assign(fila, datos, { actualizado_en: ahora() });
