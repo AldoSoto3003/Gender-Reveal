@@ -38,7 +38,7 @@ function Papel({ id }: { id: string }) {
 /**
  * Regla: lo primero que ve el invitado SIEMPRE es el sobre cerrado.
  * Nunca se arranca abierto (aunque ya lo haya abierto antes) y la invitación
- * no se dibuja hasta que se rompe el sello.
+ * queda tapada por el sobre, sin poder tocarse, hasta que se rompe el sello.
  */
 export function EscenaSobre({ evento, onAbierto, reinicio }: Props) {
   const [fase, setFase] = useState<Fase>('cerrado');
@@ -78,7 +78,11 @@ export function EscenaSobre({ evento, onAbierto, reinicio }: Props) {
 
   return (
     <header className={`sb-escena sb-${fase}${animado ? '' : ' sb-instante'}`} aria-label="Invitación en un sobre">
-      {fase !== 'cerrado' && <Portada evento={evento} />}
+      {/* Se dibuja desde el inicio (el trabajo pesado se hace al cargar, no al tocar el sello),
+          pero queda totalmente tapada por el sobre y sin interacción hasta abrirlo. */}
+      <div className="sb-portada" aria-hidden={fase === 'cerrado'}>
+        <Portada evento={evento} />
+      </div>
 
       <div className="sb-bolsillo-sombra" aria-hidden="true">
         <div className="sb-bolsillo" onClick={abrir}>

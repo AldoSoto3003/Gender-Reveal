@@ -12,6 +12,7 @@
 
 /* Bolsillo: todo el papel excepto la V de arriba */
 .sb-bolsillo-sombra {
+  will-change: transform;
   position: absolute;
   inset: 0;
   z-index: 3;
@@ -86,6 +87,7 @@
 }
 
 .sb-solapa {
+  will-change: transform;
   position: absolute;
   inset: 0;
   transform-origin: 50% 0;
@@ -136,6 +138,7 @@
 }
 
 .sb-mitad {
+  will-change: transform, opacity;
   position: absolute;
   inset: 0;
   width: 100%;
@@ -185,8 +188,8 @@
    Línea de tiempo (≈1.3 s, todo encimado):
      0.00  el sello se parte: las mitades salen disparadas girando
      0.06  la solapa se abre: arranca rápido y frena suave, con un pequeño rebote
-     0.45  la invitación empieza a acercarse
-     0.50  el sobre cae con aceleración (como por gravedad) y un leve giro
+     0.46  el sobre se levanta apenas y cae con aceleración (como por gravedad) y un leve giro
+   Solo se animan transform y opacity de capas ya preparadas (will-change): nada se redibuja.
    "abierto" repite los mismos valores finales, así que no vuelve a animar nada. */
 
 .sb-abriendo .sb-mitad-i,
@@ -250,16 +253,6 @@
   100% { transform: translateY(112%) rotate(3deg); }
 }
 
-.sb-abriendo .pt,
-.sb-abierto .pt {
-  animation: sb-acerca 1.1s cubic-bezier(0.2, 0.7, 0.2, 1) 0.2s both;
-}
-
-@keyframes sb-acerca {
-  from { transform: scale(1.06); filter: brightness(0.94); }
-  to { transform: none; filter: none; }
-}
-
 .sb-abriendo .sb-pista,
 .sb-abierto .sb-pista {
   opacity: 0;
@@ -281,4 +274,15 @@
     transition-delay: 0s !important;
     animation: none !important;
   }
+}
+
+/* La invitación vive debajo del sobre desde el inicio */
+.sb-portada {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+}
+
+.sb-cerrado .sb-portada {
+  pointer-events: none;
 }
