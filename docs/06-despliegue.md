@@ -1,6 +1,33 @@
 # Despliegue
 
-Sin CI/CD: el repo se clona en el VPS, se compila ahí y Nginx sirve la carpeta `dist/`. Los datos viven en Supabase Cloud.
+Hay dos opciones; los datos viven en Supabase Cloud en ambas.
+
+- **Opción A, Vercel:** compila solo en cada push y da HTTPS automático. Ver [la sección de Vercel](#opción-a-vercel).
+- **Opción B, VPS:** el repo se clona en el VPS, se compila ahí y Nginx sirve `dist/`. Son las secciones 1 a 5.
+
+## Opción A: Vercel
+
+1. En vercel.com → *Add New → Project*, importa `AldoSoto3003/Gender-Reveal`. La configuración de build ya viene en [`vercel.json`](../vercel.json) (`npm run build`, salida `dist`).
+2. En *Settings → Environment Variables* agrega `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY` y `VITE_EVENT_ID` (los mismos valores de la tabla de la sección 2).
+3. En *Settings → Domains* agrega `revelacion.aldosoto.dev`, y en el DNS de `aldosoto.dev` crea:
+
+| Tipo | Nombre | Valor |
+|---|---|---|
+| CNAME | `revelacion` | `cname.vercel-dns.com` |
+
+4. Cada push a `main` publica una versión nueva. Para regresar a una anterior: *Deployments → ⋯ → Promote to Production*.
+
+Notas:
+
+- `vercel.json` manda todas las rutas (`/panel`, `/guardian/...`, `/tarjeta`) a `index.html`; sin eso, recargar esas páginas daría 404.
+- El login del panel solo funciona en `revelacion.aldosoto.dev` (y en local), porque son las únicas URLs permitidas en Supabase. En las vistas previas `*.vercel.app` la invitación sí funciona, pero el panel no.
+- Con Vercel no se usan `deploy/actualizar.sh` ni la configuración de Nginx.
+
+---
+
+## Opción B: VPS
+
+Sin CI/CD: el repo se clona en el VPS, se compila ahí y Nginx sirve la carpeta `dist/`.
 
 - **URL:** https://revelacion.aldosoto.dev
 - **Repo en el VPS:** `/var/www/gender-reveal` (Nginx sirve `/var/www/gender-reveal/dist`)
@@ -143,7 +170,7 @@ npx supabase config push
 
 ## 7. Evitar que Supabase pause el proyecto
 
-El plan gratuito pausa proyectos sin actividad por 7 días. Agrega en el VPS un cron semanal (`crontab -e`):
+El plan gratuito pausa proyectos sin actividad por 7 días. Con el VPS, agrega un cron semanal (`crontab -e`); con Vercel, basta con que alguien abra la invitación o el panel al menos una vez por semana:
 
 ```text
 0 9 * * 1 curl -s "https://<proyecto>.supabase.co/rest/v1/eventos?select=id&limit=1" -H "apikey: <ANON_KEY>" > /dev/null

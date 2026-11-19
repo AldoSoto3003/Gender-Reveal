@@ -17,7 +17,7 @@ Nadie conoce el resultado antes de la fiesta, ni siquiera los papás. Un **guard
 
 - **Frontend:** React 18 + TypeScript + Vite
 - **Backend:** Supabase (Postgres, Realtime, Storage, Auth)
-- **Hosting:** VPS propio (Ubuntu + Nginx) en **https://revelacion.aldosoto.dev**; se clona y compila en el VPS (`./deploy/actualizar.sh`)
+- **Hosting:** **https://revelacion.aldosoto.dev**, en Vercel (`vercel.json`) o en un VPS con Nginx (`./deploy/actualizar.sh`)
 - **Datos:** Supabase Cloud (plan gratuito al inicio)
 
 El porqué de cada decisión está en [docs/02-arquitectura.md](docs/02-arquitectura.md).
@@ -29,7 +29,7 @@ El porqué de cada decisión está en [docs/02-arquitectura.md](docs/02-arquitec
 3. [Modelo de datos](docs/03-modelo-de-datos.md): tablas, reglas de acceso (RLS) y funciones.
 4. [Diseño](docs/04-diseno.md): colores, tipografía, componentes y animaciones.
 5. [Plan de trabajo](docs/05-plan-de-trabajo.md): etapas y fechas hasta el 16 de enero.
-6. [Despliegue](docs/06-despliegue.md): DNS, clonar en el VPS, Nginx, HTTPS y cómo actualizar.
+6. [Despliegue](docs/06-despliegue.md): Vercel o VPS, dominio, HTTPS y cómo actualizar.
 
 ## Diseño de referencia
 
