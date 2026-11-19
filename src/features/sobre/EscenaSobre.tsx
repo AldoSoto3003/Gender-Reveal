@@ -72,7 +72,7 @@ export function EscenaSobre({ evento, onAbierto, reinicio }: Props) {
       window.setTimeout(() => {
         setFase('abierto');
         onAbierto?.();
-      }, 1350),
+      }, 1300),
     );
   }
 
