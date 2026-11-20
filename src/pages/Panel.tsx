@@ -27,10 +27,48 @@ function Globito() {
   );
 }
 
+function Ojo({ abierto }: { abierto: boolean }) {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z" />
+      <circle cx="12" cy="12" r="3" />
+      {!abierto && <path d="M4 4l16 16" />}
+    </svg>
+  );
+}
+
+/** Campo de contraseña con botón para mostrarla. */
+function CampoContrasena({
+  id,
+  label,
+  value,
+  onChange,
+  autoComplete,
+}: {
+  id: string;
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+  autoComplete: 'current-password' | 'new-password';
+}) {
+  const [ver, setVer] = useState(false);
+  return (
+    <div className="field">
+      <label htmlFor={id}>{label}</label>
+      <div className="pass">
+        <input id={id} type={ver ? 'text' : 'password'} autoComplete={autoComplete} required value={value} onChange={(e) => onChange(e.target.value)} />
+        <button type="button" className="pass-ver" aria-label={ver ? 'Ocultar contraseña' : 'Mostrar contraseña'} aria-pressed={ver} onClick={() => setVer(!ver)}>
+          <Ojo abierto={!ver} />
+        </button>
+      </div>
+    </div>
+  );
+}
+
 function Entrar() {
   const [email, setEmail] = useState('');
-  const [enviado, setEnviado] = useState(false);
-  // Si venimos de un link vencido o ya usado, se explica aquí mismo.
+  const [contrasena, setContrasena] = useState('');
+  // Si alguien abre un link de acceso viejo, se explica aquí mismo.
   const [error, setError] = useState<string | null>(() => errorDelLink());
   const [enviando, setEnviando] = useState(false);
 
@@ -39,11 +77,9 @@ function Entrar() {
     setEnviando(true);
     setError(null);
     try {
-      await api.entrar(email.trim());
-      setEnviado(true);
+      await api.entrar(email.trim(), contrasena);
     } catch (err) {
       setError(mensajeError(err));
-    } finally {
       setEnviando(false);
     }
   }
@@ -53,34 +89,86 @@ function Entrar() {
       <div className="card login-card">
         <Globito />
         <h1 className="h1">Panel de los papás</h1>
-        {enviado ? (
-          <div role="status">
-            <p className="lede">
-              Te mandamos un link a <strong>{email}</strong>. Ábrelo desde este mismo navegador para entrar.
-            </p>
-            <p className="muted">
-              Puede tardar un par de minutos; revisa también spam. No pidas otro enseguida: cada link nuevo cancela al anterior y solo se
-              pueden mandar unos cuantos por hora.
-            </p>
+        <form onSubmit={enviar}>
+          <p className="lede">Entra con tu correo y tu contraseña.</p>
+          <div className="field" style={{ marginTop: 20 }}>
+            <label htmlFor="email">Correo</label>
+            <input id="email" type="email" autoComplete="username" required value={email} onChange={(e) => setEmail(e.target.value)} />
           </div>
-        ) : (
-          <form onSubmit={enviar}>
-            <p className="lede">Escribe tu correo y te mandamos un link para entrar, sin contraseña.</p>
-            <div className="field" style={{ marginTop: 20 }}>
-              <label htmlFor="email">Correo</label>
-              <input id="email" type="email" autoComplete="email" required value={email} onChange={(e) => setEmail(e.target.value)} />
-            </div>
-            <button type="submit" className="btn" style={{ marginTop: 16, width: '100%', justifyContent: 'center' }} disabled={enviando || !email}>
-              {enviando ? 'Enviando…' : 'Mandarme el link'}
-            </button>
-            {error && (
-              <p className="err" role="alert">
-                {error}
-              </p>
-            )}
-          </form>
-        )}
+          <div style={{ marginTop: 14 }}>
+            <CampoContrasena id="pass" label="Contraseña" value={contrasena} onChange={setContrasena} autoComplete="current-password" />
+          </div>
+          <button
+            type="submit"
+            className="btn"
+            style={{ marginTop: 18, width: '100%', justifyContent: 'center' }}
+            disabled={enviando || !email.trim() || !contrasena}
+          >
+            {enviando ? 'Entrando…' : 'Entrar'}
+          </button>
+          {error && (
+            <p className="err" role="alert">
+              {error}
+            </p>
+          )}
+          <p className="muted login-ayuda">¿Olvidaste tu contraseña? Pídele a quien administra la página que te asigne una nueva.</p>
+        </form>
       </div>
+    </div>
+  );
+}
+
+/** Ventana para cambiar la contraseña ya con la sesión iniciada. */
+function CambiarContrasena({ onCerrar, avisar }: { onCerrar: () => void; avisar: (m: string) => void }) {
+  const [nueva, setNueva] = useState('');
+  const [repetir, setRepetir] = useState('');
+  const [error, setError] = useState<string | null>(null);
+  const [guardando, setGuardando] = useState(false);
+  const falta = nueva.length < 8 ? 'Usa al menos 8 caracteres.' : nueva !== repetir ? 'Las dos contraseñas no coinciden.' : '';
+
+  useEffect(() => {
+    const k = (e: KeyboardEvent) => e.key === 'Escape' && onCerrar();
+    window.addEventListener('keydown', k);
+    return () => window.removeEventListener('keydown', k);
+  }, [onCerrar]);
+
+  async function guardar(e: FormEvent) {
+    e.preventDefault();
+    if (falta) return;
+    setGuardando(true);
+    setError(null);
+    try {
+      await api.cambiarContrasena(nueva);
+      avisar('Contraseña cambiada. Úsala la próxima vez que entres.');
+      onCerrar();
+    } catch (err) {
+      setError(mensajeError(err));
+      setGuardando(false);
+    }
+  }
+
+  return (
+    <div className="modal-fondo" onClick={onCerrar}>
+      <form className="card modal" role="dialog" aria-modal="true" aria-labelledby="t-pass" onSubmit={guardar} onClick={(e) => e.stopPropagation()}>
+        <p className="h3" id="t-pass">
+          Cambiar contraseña
+        </p>
+        <div style={{ display: 'grid', gap: 14, marginTop: 14 }}>
+          <CampoContrasena id="nueva" label="Nueva contraseña" value={nueva} onChange={setNueva} autoComplete="new-password" />
+          <CampoContrasena id="repetir" label="Repítela" value={repetir} onChange={setRepetir} autoComplete="new-password" />
+        </div>
+        <p className={error ? 'err' : 'muted'} role={error ? 'alert' : undefined} style={{ marginTop: 12 }}>
+          {error ?? (nueva || repetir ? falta : 'Al menos 8 caracteres.')}
+        </p>
+        <div className="modal-acciones">
+          <button type="button" className="btn btn-o" onClick={onCerrar}>
+            Cancelar
+          </button>
+          <button type="submit" className="btn" disabled={!!falta || guardando}>
+            {guardando ? 'Guardando…' : 'Guardar'}
+          </button>
+        </div>
+      </form>
     </div>
   );
 }
@@ -89,6 +177,7 @@ export function Panel() {
   const [sesion, setSesion] = useState<{ email: string; admin: boolean } | null | undefined>(undefined);
   const [tab, setTab] = useState<Tab>('resumen');
   const [toast, setToast] = useState<string | null>(null);
+  const [cambiandoPass, setCambiandoPass] = useState(false);
 
   const revisar = useCallback(() => {
     api
@@ -172,6 +261,10 @@ export function Panel() {
           {api.modo === 'supabase' && (
             <>
               <br />
+              <button type="button" className="side-out" onClick={() => setCambiandoPass(true)}>
+                Cambiar contraseña
+              </button>
+              <br />
               <button type="button" className="side-out" onClick={() => void api.salir()}>
                 Salir ({sesion.email})
               </button>
@@ -193,6 +286,7 @@ export function Panel() {
           </>
         )}
       </main>
+      {cambiandoPass && <CambiarContrasena onCerrar={() => setCambiandoPass(false)} avisar={setToast} />}
       {toast && (
         <div className="toast" role="status">
           {toast}

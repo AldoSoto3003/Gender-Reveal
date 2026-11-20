@@ -1092,3 +1092,61 @@
 .tema-txt strong { font-weight: 600; }
 .tema-txt small { font-size: 13px; color: var(--texto-suave); }
 .tema-ver { margin-top: 14px; }
+
+/* contraseña */
+.pass {
+  position: relative;
+  display: flex;
+}
+
+.pass input {
+  flex: 1;
+  min-width: 0;
+  padding-right: 48px;
+}
+
+.pass-ver {
+  position: absolute;
+  right: 4px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 10px;
+  background: none;
+  color: var(--texto-suave);
+  cursor: pointer;
+}
+
+.pass-ver:hover { background: var(--campo); color: var(--tinta); }
+
+.login-ayuda {
+  margin-top: 16px;
+  font-size: 13px;
+}
+
+.modal-fondo {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  display: grid;
+  place-items: center;
+  padding: 16px;
+  background: color-mix(in srgb, var(--tinta) 35%, transparent);
+}
+
+.modal {
+  width: 100%;
+  max-width: 400px;
+  margin: 0;
+}
+
+.modal-acciones {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 18px;
+}

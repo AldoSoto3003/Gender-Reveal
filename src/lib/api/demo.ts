@@ -188,6 +188,7 @@ export function crearApiDemo(): Api {
       return { email: 'modo-demo@local', admin: true };
     },
     async entrar() {},
+    async cambiarContrasena() {},
     async salir() {},
     alCambiarSesion() {
       return () => {};

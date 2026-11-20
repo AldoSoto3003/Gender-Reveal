@@ -137,13 +137,14 @@ export function crearApiSupabase(url: string, anonKey: string, eventoId: string)
       return { email, admin };
     },
 
-    async entrar(email) {
-      revisar(
-        await sb.auth.signInWithOtp({
-          email,
-          options: { emailRedirectTo: `${window.location.origin}/panel`, shouldCreateUser: true },
-        }),
-      );
+    async entrar(email, contrasena) {
+      const { error } = await sb.auth.signInWithPassword({ email, password: contrasena });
+      if (error) throw new Error(error.code ? `${error.code} ${error.message}` : error.message);
+    },
+
+    async cambiarContrasena(nueva) {
+      const { error } = await sb.auth.updateUser({ password: nueva });
+      if (error) throw new Error(error.code ? `${error.code} ${error.message}` : error.message);
     },
 
     async salir() {

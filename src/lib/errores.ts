@@ -4,18 +4,23 @@
  * Los mensajes propios (los de las funciones SQL) ya vienen en español y pasan tal cual.
  */
 const REGLAS: [RegExp, string | ((m: RegExpMatchArray) => string)][] = [
+  [/invalid login credentials|invalid_credentials/i, 'Correo o contraseña incorrectos. Revisa que estén bien escritos.'],
+  [/email.not.confirmed/i, 'Ese correo todavía no está confirmado. En Supabase, márcalo como confirmado (ver docs/03-modelo-de-datos.md).'],
+  [/password should be at least (\d+)/i, (m) => `La contraseña debe tener al menos ${m[1]} caracteres.`],
+  [/should be different from the old password|same_password/i, 'La nueva contraseña debe ser distinta a la actual.'],
+  [/weak password|password is known to be weak|weak_password/i, 'Esa contraseña es muy fácil de adivinar. Usa una más larga o con más variedad.'],
   [
     /email rate limit|over_email_send_rate_limit/i,
-    'Ya se mandaron varios links en poco tiempo y el correo está en pausa. Espera alrededor de una hora y pide uno solo. Mientras, revisa si el último correo que te llegó todavía funciona.',
+    'Se mandaron demasiados correos en poco tiempo. Espera alrededor de una hora e intenta de nuevo.',
   ],
   [
     /only request this (?:after|once every) (\d+) seconds?/i,
-    (m) => `Espera ${m[1]} segundos antes de pedir otro link.`,
+    (m) => `Espera ${m[1]} segundos e intenta de nuevo.`,
   ],
   [/jwt expired|invalid jwt|session.*(?:missing|expired)|refresh token/i, 'Tu sesión venció. Sal y vuelve a entrar al panel.'],
   [
     /otp_expired|(?:link|token).*(?:invalid|expired)|(?:invalid|expired).*(?:link|token)/i,
-    'Ese link ya no funciona. Cada link sirve una sola vez y deja de servir si pides uno nuevo. Abre el correo más reciente o pide otro link.',
+    'Ese link ya no funciona. Ahora se entra al panel con correo y contraseña.',
   ],
   [/unable to validate email|invalid email|email address .* is invalid/i, 'Ese correo no parece válido. Revisa que esté bien escrito.'],
   [/signups? not allowed|user not found/i, 'Ese correo no tiene acceso al panel. Usa el correo con el que se dio de alta.'],

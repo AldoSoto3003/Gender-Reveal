@@ -46,7 +46,7 @@ Las etapas 5 y 6 pueden salir después de mandar la invitación: los invitados v
 
 ## Etapa 3: panel básico
 
-- [ ] Login con link mágico y tabla `admins`
+- [ ] Login con correo y contraseña y tabla `admins`
 - [ ] Resumen y confirmaciones con filtros, búsqueda y exportación
 - [ ] Datos del evento con vista previa y links de mapas
 

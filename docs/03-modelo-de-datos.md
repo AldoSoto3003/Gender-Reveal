@@ -164,8 +164,30 @@ end $$;
 
 1. Corre la migración [`supabase/migrations/20261120000000_inicial.sql`](../supabase/migrations/20261120000000_inicial.sql).
 2. Corre [`supabase/seed.sql`](../supabase/seed.sql): crea el evento real y uno de prueba (`es_prueba = true`, se puede reiniciar para ensayar).
-3. Cada papá entra una vez a `/panel` con su correo para que exista su usuario.
+3. Crea el usuario de cada papá con su contraseña (ver abajo).
 4. Corre el `insert into admins` que está comentado al final de `seed.sql`, con sus correos.
+
+### Usuarios y contraseñas del panel
+
+El panel se abre con correo y contraseña; la app no permite registrarse. Ya dentro, cada quien puede cambiar la suya en **Cambiar contraseña** (abajo en el menú).
+
+- **Usuario nuevo:** en Supabase, *Authentication → Users → Add user → Create new user*, con su correo, una contraseña y **Auto Confirm User** marcado.
+- **Usuario que ya existía (antes se entraba con link al correo) o contraseña olvidada:** en *SQL Editor*:
+
+  ```sql
+  update auth.users
+  set encrypted_password = extensions.crypt('LA_CONTRASEÑA', extensions.gen_salt('bf')),
+      email_confirmed_at = coalesce(email_confirmed_at, now()),
+      updated_at = now()
+  where email = 'correo@ejemplo.com';
+  ```
+
+  Para ver quiénes existen y si ya son admins:
+
+  ```sql
+  select u.email, u.email_confirmed_at is not null as confirmado, a.user_id is not null as admin
+  from auth.users u left join public.admins a on a.user_id = u.id;
+  ```
 
 > Permisos: los proyectos nuevos de Supabase ya no dan acceso automático a las tablas. La migración [`20261120000100_permisos.sql`](../supabase/migrations/20261120000100_permisos.sql) otorga los `GRANT` necesarios a `anon` y `authenticated`; las políticas RLS siguen decidiendo qué filas ve cada quien.
 

@@ -120,7 +120,9 @@ export interface Api {
 
   // Papás
   sesion(): Promise<{ email: string; admin: boolean } | null>;
-  entrar(email: string): Promise<void>;
+  /** Entra con correo y contraseña (los usuarios se crean en Supabase, no desde la app). */
+  entrar(email: string, contrasena: string): Promise<void>;
+  cambiarContrasena(nueva: string): Promise<void>;
   salir(): Promise<void>;
   alCambiarSesion(cb: () => void): () => void;
   asistencias(): Promise<Asistencia[]>;

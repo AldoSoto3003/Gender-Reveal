@@ -9,7 +9,7 @@ Una invitación que se sienta como recibir un sobre de verdad, que haga particip
 | Rol | Cómo entra | Qué puede hacer |
 |---|---|---|
 | Invitado | Link por WhatsApp, sin cuenta | Abrir el sobre, ver la historia, predecir, confirmar asistencia, subir fotos del día |
-| Papás (admin) | `/panel`, con link mágico a su correo | Ver confirmaciones, editar datos del evento, administrar fotos, revelar |
+| Papás (admin) | `/panel`, con correo y contraseña | Ver confirmaciones, editar datos del evento, administrar fotos, revelar |
 | Guardián | Link único `/guardian/:token` con PIN | Capturar el resultado del sobre del doctor una sola vez |
 | Invitado mayor | Imagen por WhatsApp | Ver la tarjeta estática con los datos; confirmar por teléfono si lo prefiere |
 
@@ -76,7 +76,7 @@ Una sola página con scroll. Las secciones van en este orden.
 
 ## Panel de los papás (`/panel`)
 
-Acceso con link mágico al correo de cualquiera de los dos papás. En el celular, el menú se convierte en pestañas arriba.
+Acceso con correo y contraseña de cualquiera de los dos papás (se pueden cambiar desde el panel). En el celular, el menú se convierte en pestañas arriba.
 
 | Sección | Contenido |
 |---|---|
