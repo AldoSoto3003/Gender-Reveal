@@ -62,13 +62,15 @@ export function Portada({ evento }: { evento: Evento }) {
       </div>
 
       <div className="pt-texto">
+        <br/>
+        <br/>
+        <br/>
         <p className="pt-pre">Acompáñanos a la revelación{papas ? ` de ${papas}` : ''}</p>
         <h1 className="pt-titulo">
           <span className="pt-nina">¿Niña</span>
           <span className="pt-o">o</span>
           <span className="pt-nino">niño?</span>
         </h1>
-        <p className="pt-sub">Nadie lo sabe todavía, ni siquiera nosotros. Lo descubriremos juntos.</p>
         <div className="pt-cuando">
           <span>
             <Calendario />
