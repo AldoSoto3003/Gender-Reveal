@@ -222,12 +222,6 @@ export function Detalles({ evento, nombreSugerido }: { evento: Evento; nombreSug
               ¿Nos acompañas?
             </h2>
             <p>Confírmanos si vienes y con cuántas personas. Nos ayuda a preparar lugar y comida para todos, y puedes cambiar tu respuesta cuando quieras.</p>
-            {evento.telefono && (
-              <p className="rnote">
-                ¿Prefieres confirmar por teléfono? Llama o escribe al{' '}
-                <a href={`tel:${evento.telefono.replace(/[^\d+]/g, '')}`}>{evento.telefono}</a>.
-              </p>
-            )}
           </div>
 
           <div>
