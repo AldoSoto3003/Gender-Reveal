@@ -275,10 +275,10 @@
   display: block;
 }
 
-.tn1 { background: linear-gradient(160deg, var(--claro-nina), color-mix(in srgb, var(--globo-nina) 70%, var(--mesa))); }
-.tn2 { background: linear-gradient(160deg, var(--claro-nino), color-mix(in srgb, var(--globo-nino) 70%, var(--mesa))); }
-.tn3 { background: linear-gradient(160deg, var(--mesa), var(--claro-nina)); }
-.tn4 { background: linear-gradient(160deg, var(--mesa), var(--claro-nino)); }
+.tn1 { background: var(--claro-nina); }
+.tn2 { background: var(--claro-nino); }
+.tn3 { background: var(--mesa); }
+.tn4 { background: var(--mesa); }
 
 .foto-vacia {
   display: grid;
@@ -605,10 +605,7 @@
 .rsvp-banda {
   position: relative;
   padding-block: clamp(64px, 9vw, 112px);
-  background:
-    radial-gradient(ellipse 60% 70% at 0% 0%, color-mix(in srgb, var(--globo-nina) 22%, transparent), transparent 70%),
-    radial-gradient(ellipse 60% 70% at 100% 100%, color-mix(in srgb, var(--globo-nino) 26%, transparent), transparent 70%),
-    var(--mesa);
+  background: var(--mesa);
   scroll-margin-top: 60px;
 }
 
@@ -840,7 +837,7 @@
   text-align: center;
   padding-block: clamp(72px, 10vw, 128px);
   border-top: 1px solid var(--linea);
-  background: linear-gradient(180deg, var(--papel), var(--mesa));
+  background: var(--papel);
 }
 
 .rv .h2 {
@@ -916,7 +913,7 @@
   aspect-ratio: 1;
   max-width: 100%;
   border-radius: 18px;
-  background: repeating-linear-gradient(135deg, var(--campo) 0 12px, transparent 12px 24px);
+  background: var(--campo);
 }
 
 .mem-lock > div:nth-child(2) {
