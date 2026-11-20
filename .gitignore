@@ -8,3 +8,4 @@ dist
 supabase/.temp
 .dist-nueva
 .dist-anterior
+.vista-correo/

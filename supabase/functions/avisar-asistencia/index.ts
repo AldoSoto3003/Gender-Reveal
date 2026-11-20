@@ -11,8 +11,7 @@
 //   AVISO_REMITENTE  opcional, por defecto "Revelación <avisos@aldosoto.dev>"
 //   PANEL_URL        opcional, por defecto "https://revelacion.aldosoto.dev/panel"
 import { createClient } from 'npm:@supabase/supabase-js@2.45.4';
-
-type Respuesta = 'si' | 'tal_vez' | 'no';
+import { armarCorreo, type Respuesta, type Tema } from './plantilla.ts';
 
 interface Fila {
   id: string;
@@ -34,52 +33,6 @@ const sb = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SE
 const RESEND = Deno.env.get('RESEND_API_KEY');
 const REMITENTE = Deno.env.get('AVISO_REMITENTE') ?? 'Revelación <avisos@aldosoto.dev>';
 const PANEL = Deno.env.get('PANEL_URL') ?? 'https://revelacion.aldosoto.dev/panel';
-
-const plural = (n: number, uno: string, varios: string) => `${n} ${n === 1 ? uno : varios}`;
-const esc = (s: string) => s.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]!);
-
-function quienes(f: Fila): string {
-  const partes: string[] = [];
-  if (f.adultos) partes.push(plural(f.adultos, 'adulto', 'adultos'));
-  if (f.ninos) partes.push(plural(f.ninos, 'niño', 'niños'));
-  return partes.length ? `con ${partes.join(' y ')}` : 'sola o solo';
-}
-
-function asunto(f: Fila, anterior: Respuesta | null): string {
-  const cambio = anterior && anterior !== f.respuesta;
-  if (f.respuesta === 'si') return `${f.nombre} ${cambio ? 'ahora sí viene' : 'viene'}: ${plural(f.personas, 'persona', 'personas')}`;
-  if (f.respuesta === 'tal_vez') return `${f.nombre} ${cambio ? 'ahora' : 'todavía'} no sabe si viene`;
-  return `${f.nombre} ${cambio ? 'ya no podrá ir' : 'no podrá ir'}`;
-}
-
-function cuerpo(f: Fila, anterior: Respuesta | null, t: { si: number; tal: number; no: number }): string {
-  const texto: Record<Respuesta, string> = { si: 'Sí viene', tal_vez: 'Aún no lo sabe', no: 'No podrá ir' };
-  const filas: [string, string][] = [['Respuesta', texto[f.respuesta]]];
-  if (anterior && anterior !== f.respuesta) filas.push(['Antes', texto[anterior]]);
-  else if (anterior) filas.push(['Cambio', 'Actualizó sus datos']);
-  if (f.respuesta !== 'no') {
-    filas.push(['Personas', `${plural(f.personas, 'persona', 'personas')} (${quienes(f)})`]);
-    if (f.acompanantes) filas.push(['Acompañantes', f.acompanantes]);
-  }
-  if (f.mensaje) filas.push(['Mensaje', `“${f.mensaje}”`]);
-
-  return `<!doctype html><html lang="es"><body style="margin:0;background:#f2f0e3;font-family:Arial,Helvetica,sans-serif;color:#2c3624">
-<div style="max-width:520px;margin:0 auto;padding:28px 20px">
-  <p style="margin:0;font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:#6f7765">Confirmación de asistencia</p>
-  <h1 style="margin:8px 0 20px;font-size:24px;line-height:1.2">${esc(asunto(f, anterior))}</h1>
-  <table role="presentation" style="width:100%;border-collapse:collapse;font-size:15px">
-    ${filas
-      .map(
-        ([k, v]) =>
-          `<tr><td style="padding:10px 0;border-bottom:1px solid #dcdac8;color:#6f7765;width:120px;vertical-align:top">${esc(k)}</td><td style="padding:10px 0;border-bottom:1px solid #dcdac8;font-weight:bold">${esc(v)}</td></tr>`,
-      )
-      .join('')}
-  </table>
-  <p style="margin:24px 0 6px;font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:#6f7765">Cómo van</p>
-  <p style="margin:0;font-size:15px">Vienen <b>${plural(t.si, 'persona', 'personas')}</b> · tal vez ${t.tal} · no vienen ${t.no}</p>
-  <p style="margin:28px 0 0"><a href="${PANEL}" style="display:inline-block;background:#2c3624;color:#f6f4e8;text-decoration:none;padding:12px 22px;border-radius:999px;font-size:15px">Ver todas en el panel</a></p>
-</div></body></html>`;
-}
 
 async function correosDeAdmins(eventoId: string): Promise<string[]> {
   const { data, error } = await sb.from('admins').select('user_id').eq('evento_id', eventoId);
@@ -134,10 +87,13 @@ Deno.serve(async (req) => {
     else t.no += 1;
   }
 
+  const { data: ev } = await sb.from('eventos').select('tema').eq('id', f.evento_id).maybeSingle<{ tema: Tema | null }>();
+  const correo = armarCorreo(f, anterior, t, ev?.tema === 'clasico' ? 'clasico' : 'neutro', PANEL);
+
   const r = await fetch('https://api.resend.com/emails', {
     method: 'POST',
     headers: { Authorization: `Bearer ${RESEND}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ from: REMITENTE, to: para, subject: asunto(f, anterior), html: cuerpo(f, anterior, t) }),
+    body: JSON.stringify({ from: REMITENTE, to: para, subject: correo.asunto, html: correo.html }),
   });
   if (!r.ok) {
     // Se quita la marca para que el siguiente cambio vuelva a intentar.

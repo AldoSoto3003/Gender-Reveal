@@ -197,6 +197,14 @@ Cada vez que alguien confirma, cambia o rechaza su asistencia, llega un correo a
 
 Opcional: `AVISO_REMITENTE` (por defecto `Revelación <avisos@aldosoto.dev>`) y `PANEL_URL`.
 
+### Ver cómo se ve el correo
+
+```bash
+npx tsx scripts/vista-correo.ts .vista-correo
+```
+
+Genera dos ejemplos (uno por tema) en `.vista-correo/`; ábrelos en el navegador.
+
 ### Actualizar la función
 
 ```bash
