@@ -5,7 +5,7 @@ name: Mantener Supabase activo
 
 on:
   schedule:
-    - cron: '17 15 */3 * *' # cada 3 días, 9:17 am hora de CDMX
+    - cron: '17 15 */3 * *' # cada 3 días, 7:17 am hora de Tijuana
   workflow_dispatch:
   push:
     branches: [main]

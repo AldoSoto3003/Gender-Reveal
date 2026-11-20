@@ -21,7 +21,7 @@ eventos 1 ─── 1 resultado_sellado        (privada, sin lectura)
 | Columna | Tipo | Notas |
 |---|---|---|
 | `id` | `uuid` PK | |
-| `fecha_hora` | `timestamptz` | 2027-01-16 16:00 America/Mexico_City |
+| `fecha_hora` | `timestamptz` | 2027-01-16 14:00 America/Tijuana |
 | `lugar` | `text` | Nombre del lugar |
 | `direccion` | `text` | Se usa para los links de mapas |
 | `nota` | `text` | Opcional |

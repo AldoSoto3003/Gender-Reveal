@@ -188,7 +188,7 @@ export function Detalles({ evento, nombreSugerido }: { evento: Evento; nombreSug
           <div>
             <ul className="datos">
               <Dato icono="cal" k="Cuándo" v={fechaLarga(evento.fecha_hora)} />
-              <Dato icono="reloj" k="Hora" v={`${hora(evento.fecha_hora)} (hora del centro de México)`} />
+              <Dato icono="reloj" k="Hora" v={`${hora(evento.fecha_hora)} (hora de Tijuana)`} />
               <Dato icono="pin" k="Dónde" v={evento.lugar || 'Lugar por confirmar'} pendiente={!evento.lugar} />
               {evento.direccion && <Dato icono="pin" k="Dirección" v={evento.direccion} />}
               {evento.nota && <Dato icono="nota" k="Nota" v={evento.nota} />}

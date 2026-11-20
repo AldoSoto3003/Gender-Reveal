@@ -381,7 +381,7 @@ export function DatosEvento({ d, recargar, avisar }: Props) {
               <input id="f-fecha" type="date" value={f.fecha} onChange={set('fecha')} />
             </div>
             <div className="field">
-              <label htmlFor="f-hora">Hora (CDMX)</label>
+              <label htmlFor="f-hora">Hora (Tijuana)</label>
               <input id="f-hora" type="time" value={f.hora} onChange={set('hora')} />
             </div>
             <div className="field full">

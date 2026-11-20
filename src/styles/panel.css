@@ -940,6 +940,9 @@
 @media (max-width: 760px) {
   .pn {
     grid-template-columns: minmax(0, 1fr);
+    /* la barra mide lo que su contenido; el resto es para la sección */
+    grid-template-rows: auto 1fr;
+    align-content: start;
   }
   /* Barra superior compacta: globo, sección actual y botón "Más" */
   .side {

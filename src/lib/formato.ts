@@ -1,6 +1,7 @@
 import type { Sexo } from './types';
 
-const ZONA = 'America/Mexico_City';
+/** Todo el evento se maneja en hora de Tijuana (Pacífico, con horario de verano). */
+export const ZONA = 'America/Tijuana';
 
 export function fechaLarga(iso: string): string {
   const f = new Date(iso);
@@ -29,7 +30,7 @@ export function fechaHoraCorta(iso: string): string {
   );
 }
 
-/** Valores para <input type="date"> y <input type="time"> en hora de CDMX. */
+/** Valores para <input type="date"> y <input type="time"> en hora de Tijuana. */
 export function partesLocales(iso: string): { fecha: string; hora: string } {
   const p = new Intl.DateTimeFormat('en-CA', {
     timeZone: ZONA,
@@ -44,9 +45,23 @@ export function partesLocales(iso: string): { fecha: string; hora: string } {
   return { fecha: `${g('year')}-${g('month')}-${g('day')}`, hora: `${g('hour') === '24' ? '00' : g('hour')}:${g('minute')}` };
 }
 
-/** CDMX no tiene horario de verano desde 2022: siempre UTC-6. */
+/** Minutos que la zona del evento va adelante (+) o atrás (-) de UTC en ese instante. */
+function desfase(ts: number): number {
+  const p = new Intl.DateTimeFormat('en-US', {
+    timeZone: ZONA, hourCycle: 'h23', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit',
+  }).formatToParts(new Date(ts));
+  const g = (t: string) => Number(p.find((x) => x.type === t)?.value);
+  return (Date.UTC(g('year'), g('month') - 1, g('day'), g('hour'), g('minute'), g('second')) - ts) / 60000;
+}
+
+/** Fecha y hora escritas en hora de Tijuana → instante ISO. Respeta el horario de verano. */
 export function aIso(fecha: string, horaTxt: string): string {
-  return new Date(`${fecha}T${horaTxt}:00-06:00`).toISOString();
+  const [y, m, d] = fecha.split('-').map(Number);
+  const [h, mi] = horaTxt.split(':').map(Number);
+  const local = Date.UTC(y, m - 1, d, h, mi);
+  let ts = local - desfase(local) * 60000;
+  ts = local - desfase(ts) * 60000; // segunda pasada por si cae justo en el cambio de horario
+  return new Date(ts).toISOString();
 }
 
 export const palabra = (s: Sexo) => (s === 'nina' ? 'niña' : 'niño');
@@ -65,7 +80,7 @@ export function partesFecha(iso: string): { dia: string; mes: string; semana: st
   return { dia: p({ day: 'numeric' }), mes: cap(p({ month: 'long' })), semana: cap(p({ weekday: 'long' })), anio: p({ year: 'numeric' }) };
 }
 
-/** Inicio (00:00, hora de CDMX) del día de una fecha. Igual que la regla de la base para abrir las fotos. */
+/** Inicio (00:00, hora de Tijuana) del día de una fecha. Igual que la regla de la base para abrir las fotos. */
 export function inicioDelDia(iso: string): number {
   return Date.parse(aIso(partesLocales(iso).fecha, '00:00'));
 }
