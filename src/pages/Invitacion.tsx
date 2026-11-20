@@ -74,9 +74,11 @@ export function Invitacion() {
             {historia.length > 0 && <a href="#historia">Historia</a>}
             <a href="#votar">Predicción</a>
             <a href="#detalles">Detalles</a>
-            <a href="#confirmar">Confirmar</a>
             <a href="#revelacion">Revelación</a>
           </nav>
+          <a className="btn barra-cta" href="#confirmar">
+            Confirmar asistencia
+          </a>
         </div>
       </header>
       <main className="page" id="contenido">

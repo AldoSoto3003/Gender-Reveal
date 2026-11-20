@@ -48,10 +48,10 @@ function Dato({ icono, k, v, pendiente }: { icono: keyof typeof ICONOS; k: strin
   );
 }
 
-const OPCIONES: { valor: Respuesta; texto: string }[] = [
-  { valor: 'si', texto: 'Sí, ahí estaré' },
-  { valor: 'tal_vez', texto: 'Aún no lo sé' },
-  { valor: 'no', texto: 'No podré ir' },
+const OPCIONES: { valor: Respuesta; texto: string; icono: string }[] = [
+  { valor: 'si', texto: 'Sí, ahí estaré', icono: 'M5 12.5l4.5 4.5L19 7.5' },
+  { valor: 'tal_vez', texto: 'Aún no lo sé', icono: 'M9.2 9a3 3 0 1 1 4.3 2.7c-.9.4-1.5 1.2-1.5 2.2v.6M12 18h.01' },
+  { valor: 'no', texto: 'No podré ir', icono: 'M7 7l10 10M17 7L7 17' },
 ];
 
 const plural = (n: number, uno: string, varios: string) => `${n} ${n === 1 ? uno : varios}`;
@@ -165,6 +165,7 @@ export function Detalles({ evento, nombreSugerido }: { evento: Evento; nombreSug
   const pista = !nombre.trim() ? 'Escribe tu nombre.' : !respuesta ? 'Dinos si vienes.' : '';
 
   return (
+    <>
     <section className="sec" id="detalles" aria-labelledby="h-det">
       <div className="wrap">
         <div className="sec-cab">
@@ -209,12 +210,18 @@ export function Detalles({ evento, nombreSugerido }: { evento: Evento; nombreSug
             )}
           </div>
         </div>
+      </div>
+    </section>
 
-        <div className="rsvp" id="confirmar">
+    <section className="rsvp-banda" id="confirmar" aria-labelledby="h-rsvp">
+      <div className="wrap">
+        <div className="rsvp">
           <div className="rsvp-intro">
-            <span className="tag">Confirmación</span>
-            <h3>Confirma tu asistencia</h3>
-            <p>Nos ayuda a preparar lugar y comida para todos. Puedes cambiar tu respuesta cuando quieras.</p>
+            <span className="tag">Lo más importante</span>
+            <h2 className="h2" id="h-rsvp">
+              ¿Nos acompañas?
+            </h2>
+            <p>Confírmanos si vienes y con cuántas personas. Nos ayuda a preparar lugar y comida para todos, y puedes cambiar tu respuesta cuando quieras.</p>
             {evento.telefono && (
               <p className="rnote">
                 ¿Prefieres confirmar por teléfono? Llama o escribe al{' '}
@@ -248,9 +255,14 @@ export function Detalles({ evento, nombreSugerido }: { evento: Evento; nombreSug
                   <span className="lbl" id="lbl-vienes">
                     ¿Vienes a la fiesta?
                   </span>
-                  <div className="seg" role="group" aria-labelledby="lbl-vienes">
+                  <div className="vienes" role="group" aria-labelledby="lbl-vienes">
                     {OPCIONES.map((o) => (
-                      <button key={o.valor} type="button" aria-pressed={respuesta === o.valor} onClick={() => setRespuesta(o.valor)}>
+                      <button key={o.valor} type="button" className={`vienes-op ${o.valor}`} aria-pressed={respuesta === o.valor} onClick={() => setRespuesta(o.valor)}>
+                        <span className="vienes-ico" aria-hidden="true">
+                          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
+                            <path d={o.icono} />
+                          </svg>
+                        </span>
                         {o.texto}
                       </button>
                     ))}
@@ -297,7 +309,7 @@ export function Detalles({ evento, nombreSugerido }: { evento: Evento; nombreSug
                   />
                 </div>
                 <div className="fila-envio">
-                  <button type="submit" className="btn" disabled={!nombre.trim() || !respuesta || enviando}>
+                  <button type="submit" className="btn btn-grande" disabled={!nombre.trim() || !respuesta || enviando}>
                     {enviando ? 'Enviando…' : 'Enviar confirmación'}
                   </button>
                   {mia && (
@@ -334,5 +346,6 @@ export function Detalles({ evento, nombreSugerido }: { evento: Evento; nombreSug
         </div>
       </div>
     </section>
+    </>
   );
 }

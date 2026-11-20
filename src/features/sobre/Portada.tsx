@@ -88,6 +88,9 @@ export function Portada({ evento }: { evento: Evento }) {
             </div>
           ))}
         </div>
+        <a className="btn pt-cta" href="#confirmar">
+          Confirmar mi asistencia
+        </a>
       </div>
 
       <a className="pt-desliza" href="#contenido">
