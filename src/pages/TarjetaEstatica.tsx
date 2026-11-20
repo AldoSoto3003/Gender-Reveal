@@ -32,8 +32,9 @@ export function TarjetaEstatica() {
         body { background: var(--mesa); }
         .tarjeta-sola { min-height: 100vh; display: grid; place-items: center; padding: 24px; }
         .tarjeta-sola figure { margin: 0; width: min(560px, 100%); }
-        .tarjeta-svg { width: 100%; display: block; box-shadow: 0 1px 2px rgba(40,30,20,.2), 0 30px 60px -20px rgba(50,36,22,.45); }
-        .tarjeta-sola figcaption { margin-top: 18px; text-align: center; font-family: var(--sans); font-weight: 500; color: var(--tinta); font-size: 18px; }
+        .tarjeta-svg { width: 100%; display: block; border-radius: 6px; box-shadow: 0 1px 2px rgba(0,0,0,.06), 0 24px 48px -24px rgba(0,0,0,.28); }
+        .tarjeta-sola figcaption { margin-top: 18px; text-align: center; font-family: var(--sans); font-weight: 500; color: var(--texto-suave); font-size: 15px; }
+        .tarjeta-sola figcaption strong { color: var(--tinta); }
         @media print { body { background: #fff; } .tarjeta-svg { box-shadow: none; } .tarjeta-sola { padding: 0; } }
       `}</style>
     </div>

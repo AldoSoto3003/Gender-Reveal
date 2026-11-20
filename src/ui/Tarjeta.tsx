@@ -1,62 +1,115 @@
-import { fechaCorta, hora } from '../lib/formato';
+import { fechaCorta, hora, partesFecha } from '../lib/formato';
 import type { Evento } from '../lib/types';
 import { NINA, NINO, TINTA_NINA, TINTA_NINO } from './SvgDefs';
 
-/** Tamaño de letra para que una línea quepa en el ancho de la tarjeta. */
-function talla(texto: string, base: number, ancho = 520): number {
-  const estimado = texto.length * base * 0.62;
-  return estimado > ancho ? Math.max(14, Math.floor((ancho / (texto.length * 0.62)) * 10) / 10) : base;
+/** Tamaño de letra para que una línea quepa en el ancho dado. */
+function talla(texto: string, base: number, ancho: number, factor = 0.58): number {
+  const estimado = texto.length * base * factor;
+  return estimado > ancho ? Math.max(11, Math.floor((ancho / (texto.length * factor)) * 10) / 10) : base;
 }
 
-function Linea({ y, texto, base }: { y: number; texto: string; base: number }) {
-  return (
-    <text x={300} y={y} fontSize={talla(texto, base)}>
-      {texto}
-    </text>
-  );
-}
+const DISPLAY = "'Bricolage Grotesque', 'Avenir Next', 'Segoe UI', sans-serif";
+const SANS = "'Figtree', 'Segoe UI', Helvetica, Arial, sans-serif";
+const ORO = 'var(--oro)';
+const TINTA = { fill: 'var(--tinta)' };
+const SUAVE = { fill: 'var(--texto-suave)' };
 
-/** La tarjeta de la invitación (600 × 840) en papel de acuarela. */
+/**
+ * La tarjeta de la invitación (600 × 840) para mandar por WhatsApp o imprimir.
+ * Papelería sobria: mucho aire, filetes dorados finos, dos globos pequeños y la fecha al centro.
+ * Los colores salen del tema elegido en el panel.
+ */
 export function Tarjeta({ evento, className }: { evento: Evento; className?: string }) {
   const papas = evento.nombres_papas.trim();
-  const fecha = `${fechaCorta(evento.fecha_hora)}, ${hora(evento.fecha_hora)}`.toUpperCase();
-  const lugar = (evento.lugar || 'Lugar por confirmar').toUpperCase();
-  const direccion = evento.direccion.toUpperCase();
+  const f = partesFecha(evento.fecha_hora);
+  const lugar = evento.lugar.trim() || 'Lugar por confirmar';
+  const direccion = evento.direccion.trim();
   const etiqueta = `¿Niña o niño? Acompáñanos a la revelación de género${papas ? ` de ${papas}` : ''}. ${fechaCorta(
     evento.fecha_hora,
-  )} a las ${hora(evento.fecha_hora)}. ${evento.lugar} ${evento.direccion}`;
+  )} a las ${hora(evento.fecha_hora)}. ${lugar}${direccion ? `, ${direccion}` : ''}.`;
 
   return (
     <svg className={className} viewBox="0 0 600 840" role="img" aria-label={etiqueta}>
-      <rect width={600} height={840} filter="url(#paperLit)" />
-      <use href="#bal" x={200} y={-150} width={190} height={247} style={{ color: NINO }} opacity={0.42} />
-      <use href="#bal" x={468} y={-24} width={200} height={260} style={{ color: NINA }} opacity={0.5} />
-      <use href="#bal" x={-112} y={318} width={200} height={260} style={{ color: NINO }} opacity={0.55} />
-      <use href="#bal" x={502} y={372} width={170} height={221} style={{ color: NINA }} opacity={0.48} />
-      <path d="M170 322C150 420 204 520 132 640C92 708 72 780 62 840" fill="none" stroke="url(#goldLine)" strokeWidth={2.6} />
-      <path d="M170 322C192 432 140 540 176 664C190 720 182 790 196 840" fill="none" stroke="url(#goldLine)" strokeWidth={1.4} />
-      <path d="M435 448C456 540 398 622 470 722C500 772 520 810 538 840" fill="none" stroke="url(#goldLine)" strokeWidth={2.6} />
-      <path d="M435 448C420 548 470 630 444 730C434 780 446 816 452 840" fill="none" stroke="url(#goldLine)" strokeWidth={1.4} />
-      <use href="#bal" x={30} y={20} width={280} height={364} style={{ color: NINA }} />
-      <use href="#bal" x={300} y={152} width={270} height={351} style={{ color: NINO }} />
-      <g fontFamily="Bricolage Grotesque, Avenir Next, Segoe UI, sans-serif" fontWeight={700} textAnchor="middle">
-        <g style={{ fill: TINTA_NINA }} fontSize={46} fontWeight={800} letterSpacing={0} transform="rotate(-4 168 175)">
-          <text x={168} y={138}>¿NIÑA</text>
-          <text x={168} y={186}>O</text>
-          <text x={168} y={234}>NIÑO?</text>
+      {/* papel */}
+      <rect width={600} height={840} style={{ fill: 'var(--papel-tarjeta)' }} />
+      <rect width={600} height={840} filter="url(#paperLit)" opacity={0.22} style={{ mixBlendMode: 'multiply' }} />
+
+      {/* doble filete dorado */}
+      <rect x={24} y={24} width={552} height={792} rx={4} fill="none" stroke={ORO} strokeWidth={1} opacity={0.85} />
+      <rect x={31} y={31} width={538} height={778} rx={2} fill="none" stroke={ORO} strokeWidth={0.5} opacity={0.5} />
+
+      {/* dos globos con hilos que se juntan en un moño */}
+      <g>
+        <path d="M274 190C268 222 290 252 300 292" fill="none" stroke={ORO} strokeWidth={0.9} />
+        <path d="M324 199C330 230 310 258 300 292" fill="none" stroke={ORO} strokeWidth={0.9} />
+        <path d="M300 292C292 285 284 288 288 294C291 298 297 296 300 292ZM300 292C308 285 316 288 312 294C309 298 303 296 300 292Z" fill={ORO} />
+        <path d="M300 292L296 310M300 292L304 309" stroke={ORO} strokeWidth={0.8} strokeLinecap="round" />
+        <g transform="rotate(-9 268 150)">
+          <use href="#bal" x={214} y={72} width={108} height={140} style={{ color: NINA }} />
         </g>
-        <g style={{ fill: TINTA_NINO }} fontSize={46} fontWeight={800} letterSpacing={0} transform="rotate(4 436 300)">
-          <text x={436} y={286}>¿QUÉ</text>
-          <text x={436} y={336}>SERÁ?</text>
+        <g transform="rotate(8 330 158)">
+          <use href="#bal" x={278} y={86} width={104} height={135} style={{ color: NINO }} />
         </g>
-        <g style={{ fill: 'var(--tinta)' }} letterSpacing={1.5}>
-          <Linea y={560} texto="ACOMPÁÑANOS A LA" base={23} />
-          <Linea y={612} texto="REVELACIÓN DE GÉNERO" base={44} />
-          {papas && <Linea y={652} texto={`DE ${papas.toUpperCase()}`} base={23} />}
-          <Linea y={714} texto={fecha} base={22} />
-          <Linea y={746} texto={lugar} base={22} />
-          {direccion && <Linea y={778} texto={direccion} base={22} />}
-        </g>
+      </g>
+
+      <g textAnchor="middle">
+        <text x={300} y={366} fontFamily={SANS} fontSize={12.5} fontWeight={600} letterSpacing={4.5} style={SUAVE}>
+          ACOMPÁÑANOS A LA REVELACIÓN
+        </text>
+
+        <text x={300} y={432} fontFamily={DISPLAY} fontSize={58} fontWeight={600} letterSpacing={-1.5}>
+          <tspan style={{ fill: TINTA_NINA }}>¿Niña</tspan>
+          <tspan fontSize={30} fontWeight={300} dx={6} dy={-6} style={SUAVE}>
+            o
+          </tspan>
+          <tspan dx={6} dy={6} style={{ fill: TINTA_NINO }}>
+            niño?
+          </tspan>
+        </text>
+
+        {papas && (
+          <text x={300} y={470} fontFamily={SANS} fontSize={talla(`de ${papas}`, 17, 420)} fontStyle="italic" style={SUAVE}>
+            de {papas}
+          </text>
+        )}
+
+        {/* separador */}
+        <line x1={258} y1={504} x2={290} y2={504} stroke={ORO} strokeWidth={0.8} />
+        <path d="M300 500L304 504L300 508L296 504Z" fill={ORO} />
+        <line x1={310} y1={504} x2={342} y2={504} stroke={ORO} strokeWidth={0.8} />
+
+        {/* fecha clásica: día de la semana | número | mes y año */}
+        <text x={236} y={590} fontFamily={SANS} fontSize={14} fontWeight={600} letterSpacing={3.5} textAnchor="end" style={TINTA}>
+          {f.semana.toUpperCase()}
+        </text>
+        <line x1={256} y1={548} x2={256} y2={612} stroke={ORO} strokeWidth={0.8} />
+        <text x={300} y={604} fontFamily={DISPLAY} fontSize={62} fontWeight={500} letterSpacing={-2} style={TINTA}>
+          {f.dia}
+        </text>
+        <line x1={344} y1={548} x2={344} y2={612} stroke={ORO} strokeWidth={0.8} />
+        <text x={364} y={582} fontFamily={SANS} fontSize={14} fontWeight={600} letterSpacing={3.5} textAnchor="start" style={TINTA}>
+          {f.mes.toUpperCase()}
+        </text>
+        <text x={364} y={602} fontFamily={SANS} fontSize={13} letterSpacing={3} textAnchor="start" style={SUAVE}>
+          {f.anio}
+        </text>
+
+        <text x={300} y={656} fontFamily={SANS} fontSize={13} fontWeight={600} letterSpacing={4} style={SUAVE}>
+          A LAS {hora(evento.fecha_hora).toUpperCase()}
+        </text>
+
+        <text x={300} y={712} fontFamily={DISPLAY} fontSize={talla(lugar, 21, 440, 0.55)} fontWeight={600} letterSpacing={-0.3} style={TINTA}>
+          {lugar}
+        </text>
+        {direccion && (
+          <text x={300} y={740} fontFamily={SANS} fontSize={talla(direccion, 14, 460, 0.52)} style={SUAVE}>
+            {direccion}
+          </text>
+        )}
+
+        <text x={300} y={784} fontFamily={SANS} fontSize={11} fontWeight={600} letterSpacing={3.5} opacity={0.75} style={SUAVE}>
+          TE ESPERAMOS
+        </text>
       </g>
     </svg>
   );
