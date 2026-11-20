@@ -6,15 +6,9 @@ import { appleMaps, googleMaps } from '../../lib/mapas';
 import { PRESETS, TEMAS, aplicarTema, coloresDe, contraste, esHex, temaDe } from '../../lib/tema';
 import type { Asistencia, Colores, Evento, FotoHistoria, FotoRecuerdo, Respuesta, Sexo, Tema } from '../../lib/types';
 import { Lluvia } from '../revelacion/Celebracion';
-import { Selector, type Opcion } from '../../ui/Selector';
 import type { DatosPanel } from './usePanel';
 
 type Avisar = (msg: string) => void;
-
-const TIPOS_FOTO: Opcion<FotoHistoria['tipo']>[] = [
-  { valor: 'foto', texto: 'Foto' },
-  { valor: 'ecografia', texto: 'Ecografía' },
-];
 type Props = { d: DatosPanel; recargar: () => Promise<void>; avisar: Avisar };
 
 const ETIQUETA: Record<Respuesta, string> = { si: 'Viene', tal_vez: 'Tal vez', no: 'No viene' };
@@ -650,13 +644,6 @@ export function Historia({ d, recargar, avisar }: Props) {
             <div className="ph-b">
               <input type="text" defaultValue={f.titulo} maxLength={80} aria-label="Título de la foto" onBlur={(e) => e.target.value !== f.titulo && void editar(f, { titulo: e.target.value })} />
               <div className="ph-act">
-                <Selector
-                  etiqueta="Tipo de foto"
-                  className="ph-tipo"
-                  valor={f.tipo}
-                  opciones={TIPOS_FOTO}
-                  onCambio={(tipo) => void editar(f, { tipo })}
-                />
                 <button type="button" className="ib" aria-label="Mover antes" disabled={i === 0} onClick={() => void mover(i, -1)}>
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M15 18l-6-6 6-6" />
