@@ -212,3 +212,9 @@ npx supabase functions deploy avisar-asistencia --use-api
 ```
 
 Si un aviso no llega, revisa los logs en *Supabase → Edge Functions → avisar-asistencia → Logs*.
+
+## Mantener Supabase activo
+
+El plan gratis de Supabase pausa el proyecto si pasa 7 días sin actividad. El workflow [`mantener-supabase.yml`](../.github/workflows/mantener-supabase.yml) hace una consulta pequeña a `eventos` cada 3 días desde GitHub Actions. Se puede correr a mano en *GitHub → Actions → Mantener Supabase activo → Run workflow*.
+
+GitHub apaga los workflows programados de repos sin commits en 60 días; si pasa, vuelve a activarlo desde la misma pantalla.
