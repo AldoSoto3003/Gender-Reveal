@@ -114,7 +114,9 @@ export function EscenaSobre({ evento, onAbierto, reinicio }: Props) {
         </div>
       </div>
 
-      <div className="sb-sello" aria-hidden="true">
+      {/* key={reinicio}: al volver a cerrar se crea un sello nuevo. En iOS el filter del contenedor
+          guardaba el último cuadro de la animación (vacío) y el sello no reaparecía. */}
+      <div className="sb-sello" aria-hidden="true" key={reinicio}>
         <img className="sb-mitad sb-mitad-i" src="/sobre/sello.svg" alt="" />
         <img className="sb-mitad sb-mitad-d" src="/sobre/sello.svg" alt="" />
       </div>
