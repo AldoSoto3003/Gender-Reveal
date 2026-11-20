@@ -3,7 +3,30 @@
 // los clientes de correo (Gmail, Outlook, Apple Mail).
 
 export type Respuesta = 'si' | 'tal_vez' | 'no';
-export type Tema = 'neutro' | 'clasico';
+export type Tema = 'neutro' | 'clasico' | 'personal';
+export interface Colores {
+  nina: string;
+  nino: string;
+  tinta: string;
+  papel: string;
+}
+
+/** Mezcla dos colores hex (p = peso del primero, 0 a 1). Igual que color-mix en base.css. */
+function mezcla(a: string, b: string, p: number): string {
+  const c = (h: string) => [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16));
+  const [x, y] = [c(a), c(b)];
+  return '#' + x.map((v, i) => Math.round(v * p + y[i] * (1 - p)).toString(16).padStart(2, '0')).join('').toUpperCase();
+}
+
+/** Misma derivación que :root[data-tema='personal'] en base.css. */
+function paletaPersonal(k: Colores): Record<string, string> {
+  return {
+    papel: k.papel, mesa: mezcla(k.tinta, k.papel, 0.07), linea: mezcla(k.tinta, k.papel, 0.15), tinta: k.tinta,
+    suave: mezcla(k.tinta, k.papel, 0.78), tenue: mezcla(k.tinta, k.papel, 0.64),
+    nina: mezcla(k.nina, k.tinta, 0.55), nino: mezcla(k.nino, k.tinta, 0.55),
+    claroNina: mezcla(k.nina, k.papel, 0.42), claroNino: mezcla(k.nino, k.papel, 0.42), boton: k.papel,
+  };
+}
 
 export interface Asistencia {
   nombre: string;
@@ -22,7 +45,7 @@ export interface Totales {
 }
 
 /** Los mismos colores que la página (src/styles/base.css). */
-const PALETAS: Record<Tema, Record<string, string>> = {
+const PALETAS: Record<'neutro' | 'clasico', Record<string, string>> = {
   neutro: {
     papel: '#F2F0E3', mesa: '#E8E6D2', linea: '#DCDAC8', tinta: '#2C3624', suave: '#59624D', tenue: '#6F7765',
     nina: '#845F06', nino: '#46652E', claroNina: '#F3D98D', claroNino: '#CFDCBC', boton: '#F6F4E8',
@@ -60,8 +83,9 @@ export function armarCorreo(
   t: Totales,
   tema: Tema,
   panelUrl: string,
+  colores?: Colores | null,
 ): { asunto: string; html: string } {
-  const c = PALETAS[tema];
+  const c = tema === 'personal' && colores ? paletaPersonal(colores) : PALETAS[tema === 'clasico' ? 'clasico' : 'neutro'];
   const cambio = !!anterior && anterior !== a.respuesta;
   const edicion = !!anterior && anterior === a.respuesta;
 

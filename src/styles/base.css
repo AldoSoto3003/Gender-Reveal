@@ -57,6 +57,28 @@
   --sombra: 60, 52, 44;
 }
 
+:root[data-tema='personal'] {
+  /* Paleta armada en el panel: --globo-nina, --globo-nino, --tinta y --papel llegan como estilo
+     en <html> (lib/tema.ts). Todo lo demás se deriva de esos 4 colores. */
+  --tinta-fuerte: color-mix(in srgb, var(--tinta) 80%, black);
+  --texto: var(--tinta);
+  --texto-suave: color-mix(in srgb, var(--tinta) 78%, var(--papel));
+  --texto-tenue: color-mix(in srgb, var(--tinta) 64%, var(--papel));
+  --campo: color-mix(in srgb, var(--tinta) 6%, transparent);
+  --linea: color-mix(in srgb, var(--tinta) 15%, transparent);
+  --mesa: color-mix(in srgb, var(--tinta) 7%, var(--papel));
+  --papel-tarjeta: color-mix(in srgb, white 55%, var(--papel));
+  --claro-nina: color-mix(in srgb, var(--globo-nina) 42%, var(--papel));
+  --claro-nino: color-mix(in srgb, var(--globo-nino) 42%, var(--papel));
+  --tinta-nina: color-mix(in srgb, var(--globo-nina) 55%, var(--tinta));
+  --tinta-nino: color-mix(in srgb, var(--globo-nino) 55%, var(--tinta));
+  --boton-texto: var(--papel);
+  --sobre-papel: color-mix(in srgb, var(--globo-nino) 32%, var(--papel));
+  --sobre-solapa: color-mix(in srgb, var(--globo-nino) 42%, var(--papel));
+  --sobre-forro: var(--papel-tarjeta);
+  --sobre-pista: var(--texto-suave);
+}
+
 *,
 *::before,
 *::after {

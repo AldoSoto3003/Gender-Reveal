@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState, type FormEvent } from 'react';
-import { temaDe, useTema } from '../lib/tema';
+import { useTema } from '../lib/tema';
 import { api, mensajeError } from '../lib/api';
 import { errorDelLink } from '../lib/errores';
 import { usePanel } from '../features/panel/usePanel';
@@ -195,7 +195,7 @@ export function Panel() {
 
   const admin = !!sesion?.admin;
   const datos = usePanel(admin);
-  useTema(datos.evento ? temaDe(datos.evento) : null);
+  useTema(datos.evento);
 
   useEffect(() => {
     if (!toast) return;

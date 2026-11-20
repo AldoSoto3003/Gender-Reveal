@@ -3,8 +3,8 @@ import { api, mensajeError } from '../../lib/api';
 import { aIso, fechaCorta, fechaHoraCorta, fechaLarga, hora, partesLocales, titulo } from '../../lib/formato';
 import { reducirFoto } from '../../lib/imagen';
 import { appleMaps, googleMaps } from '../../lib/mapas';
-import { TEMAS, temaDe } from '../../lib/tema';
-import type { Asistencia, Evento, FotoHistoria, FotoRecuerdo, Respuesta, Sexo, Tema } from '../../lib/types';
+import { PRESETS, TEMAS, aplicarTema, coloresDe, contraste, esHex, temaDe } from '../../lib/tema';
+import type { Asistencia, Colores, Evento, FotoHistoria, FotoRecuerdo, Respuesta, Sexo, Tema } from '../../lib/types';
 import { Lluvia } from '../revelacion/Celebracion';
 import type { DatosPanel } from './usePanel';
 
@@ -270,24 +270,90 @@ function FotoSegura({ src, alt }: { src: string; alt: string }) {
   return <img src={src} alt={alt} onError={() => setRota(true)} />;
 }
 
-/** Los papás eligen la paleta de la invitación; el cambio llega a todos los invitados al momento. */
+const CAMPOS_COLOR: { k: keyof Colores; nombre: string; ayuda: string }[] = [
+  { k: 'nina', nombre: 'Niña', ayuda: 'Globo, barra y textos de niña' },
+  { k: 'nino', nombre: 'Niño', ayuda: 'Globo, barra y textos de niño' },
+  { k: 'tinta', nombre: 'Texto y botones', ayuda: 'Títulos, letras y botones' },
+  { k: 'papel', nombre: 'Fondo', ayuda: 'Color de la página' },
+];
+
+function Muestra({ c }: { c: Colores }) {
+  return (
+    <span className="tema-muestra" style={{ background: c.papel, boxShadow: `inset 0 0 0 1px ${c.tinta}22` }} aria-hidden="true">
+      <i style={{ background: c.nina }} />
+      <i style={{ background: c.nino }} />
+      <b style={{ background: c.tinta }} />
+    </span>
+  );
+}
+
+/** Un color: muestra con selector nativo + campo hexadecimal. */
+function CampoColor({ id, nombre, ayuda, valor, onCambio }: { id: string; nombre: string; ayuda: string; valor: string; onCambio: (v: string) => void }) {
+  const [texto, setTexto] = useState(valor);
+  useEffect(() => setTexto(valor), [valor]);
+  return (
+    <div className="color-fila">
+      <div className="color-txt">
+        <label htmlFor={id}>{nombre}</label>
+        <small>{ayuda}</small>
+      </div>
+      <input className="color-pick" type="color" aria-label={`${nombre}: elegir color`} value={valor} onChange={(e) => onCambio(e.target.value.toUpperCase())} />
+      <input
+        id={id}
+        className={`color-hex${esHex(texto) ? '' : ' mal'}`}
+        type="text"
+        inputMode="text"
+        spellCheck={false}
+        maxLength={7}
+        value={texto}
+        onChange={(e) => {
+          let v = e.target.value.trim();
+          if (v && !v.startsWith('#')) v = `#${v}`;
+          setTexto(v.toUpperCase());
+          if (esHex(v)) onCambio(v.toUpperCase());
+        }}
+        onBlur={() => setTexto(valor)}
+      />
+    </div>
+  );
+}
+
+/** Los papás eligen la paleta de la invitación (o arman una propia); el cambio llega a todos al momento. */
 function ElegirTema({ ev, recargar, avisar }: { ev: Evento } & Pick<Props, 'recargar' | 'avisar'>) {
   const actual = temaDe(ev);
-  const [guardando, setGuardando] = useState<Tema | null>(null);
+  const [guardando, setGuardando] = useState<string | null>(null);
+  const [editando, setEditando] = useState(false);
+  const [borrador, setBorrador] = useState<Colores>(() => coloresDe(ev));
 
-  async function elegir(t: Tema) {
-    if (t === actual || guardando) return;
-    setGuardando(t);
+  // Mientras editan, el panel entero se pinta con el borrador; al salir vuelve a lo guardado.
+  const guardado = useRef(ev);
+  guardado.current = ev;
+  useEffect(() => {
+    if (!editando) return;
+    aplicarTema('personal', borrador);
+    // Si cambian de sección a medio editar, regresa a la paleta guardada.
+    return () => aplicarTema(temaDe(guardado.current), guardado.current.colores);
+  }, [editando, borrador]);
+  useEffect(() => {
+    if (!editando) aplicarTema(temaDe(ev), ev.colores);
+  }, [editando, ev]);
+
+  async function guardar(cambios: { tema: Tema; colores?: Colores }, nombre: string, clave: string) {
+    if (guardando) return;
+    setGuardando(clave);
     try {
-      await api.actualizarEvento({ tema: t });
+      await api.actualizarEvento(cambios);
       await recargar();
-      avisar(`Listo: la invitación ahora se ve en ${TEMAS.find((x) => x.valor === t)?.nombre.toLowerCase()}.`);
+      setEditando(false);
+      avisar(`Listo: la invitación ahora se ve en ${nombre}.`);
     } catch (e) {
       avisar(mensajeError(e));
     } finally {
       setGuardando(null);
     }
   }
+
+  const bajo = contraste(borrador.tinta, borrador.papel) < 4.5;
 
   return (
     <div className="card">
@@ -299,22 +365,81 @@ function ElegirTema({ ev, recargar, avisar }: { ev: Evento } & Pick<Props, 'reca
             key={t.valor}
             type="button"
             role="radio"
-            aria-checked={actual === t.valor}
-            className={`tema${actual === t.valor ? ' on' : ''}`}
+            aria-checked={actual === t.valor && !editando}
+            className={`tema${actual === t.valor && !editando ? ' on' : ''}`}
             disabled={!!guardando}
-            onClick={() => void elegir(t.valor)}
+            onClick={() => (actual === t.valor && !editando ? undefined : void guardar({ tema: t.valor }, t.nombre.toLowerCase(), t.valor))}
           >
-            <span className="tema-muestra" style={{ background: t.fondo }} aria-hidden="true">
-              <i style={{ background: t.nina }} />
-              <i style={{ background: t.nino }} />
-            </span>
+            <Muestra c={t.colores} />
             <span className="tema-txt">
               <strong>{t.nombre}</strong>
               <small>{guardando === t.valor ? 'Guardando…' : t.detalle}</small>
             </span>
           </button>
         ))}
+        <button
+          type="button"
+          role="radio"
+          aria-checked={actual === 'personal' || editando}
+          className={`tema${actual === 'personal' || editando ? ' on' : ''}`}
+          disabled={!!guardando}
+          onClick={() => {
+            if (!editando) setBorrador(coloresDe(ev));
+            setEditando(true);
+          }}
+        >
+          <Muestra c={actual === 'personal' && !editando && ev.colores ? ev.colores : borrador} />
+          <span className="tema-txt">
+            <strong>Paleta propia</strong>
+            <small>{actual === 'personal' && !editando ? 'La que armaron ustedes · tocar para editar' : 'Ármenla con sus colores'}</small>
+          </span>
+        </button>
       </div>
+
+      {editando && (
+        <div className="paleta">
+          <p className="paleta-t">Empezar desde</p>
+          <div className="presets">
+            {PRESETS.map((p) => {
+              const igual = (Object.keys(p.colores) as (keyof Colores)[]).every((k) => p.colores[k].toUpperCase() === borrador[k].toUpperCase());
+              return (
+                <button key={p.nombre} type="button" className={`preset${igual ? ' on' : ''}`} onClick={() => setBorrador({ ...p.colores })}>
+                  <span className="preset-pts" aria-hidden="true">
+                    <i style={{ background: p.colores.nina }} />
+                    <i style={{ background: p.colores.nino }} />
+                    <i style={{ background: p.colores.tinta }} />
+                  </span>
+                  {p.nombre}
+                </button>
+              );
+            })}
+          </div>
+
+          <div className="colores">
+            {CAMPOS_COLOR.map((c) => (
+              <CampoColor key={c.k} id={`color-${c.k}`} nombre={c.nombre} ayuda={c.ayuda} valor={borrador[c.k]} onCambio={(v) => setBorrador({ ...borrador, [c.k]: v })} />
+            ))}
+          </div>
+
+          <div className="paleta-prev" style={{ background: borrador.papel, color: borrador.tinta }} aria-hidden="true">
+            <span style={{ color: `color-mix(in srgb, ${borrador.nina} 55%, ${borrador.tinta})` }}>¿Niña</span>
+            <span style={{ opacity: 0.6, fontSize: '0.6em' }}> o </span>
+            <span style={{ color: `color-mix(in srgb, ${borrador.nino} 55%, ${borrador.tinta})` }}>niño?</span>
+            <i style={{ background: borrador.tinta, color: borrador.papel }}>Botón</i>
+          </div>
+          {bajo && <p className="aviso-contraste">El texto casi no contrasta con el fondo; a algunos invitados les costará leerlo. Prueben un texto más oscuro o un fondo más claro.</p>}
+
+          <div className="paleta-acciones">
+            <button type="button" className="btn btn-o btn-sm" onClick={() => setEditando(false)} disabled={!!guardando}>
+              Cancelar
+            </button>
+            <button type="button" className="btn btn-sm" disabled={!!guardando} onClick={() => void guardar({ tema: 'personal', colores: borrador }, 'su paleta propia', 'personal')}>
+              {guardando === 'personal' ? 'Guardando…' : 'Guardar y publicar'}
+            </button>
+          </div>
+        </div>
+      )}
+
       <a className="btn btn-o btn-sm tema-ver" href="/" target="_blank" rel="noopener noreferrer">
         Ver la invitación
       </a>

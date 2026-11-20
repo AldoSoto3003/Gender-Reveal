@@ -1,7 +1,17 @@
 export type Sexo = 'nina' | 'nino';
 
-/** neutro = miel y salvia; clasico = rosa y azul */
-export type Tema = 'neutro' | 'clasico';
+/** neutro = miel y salvia; clasico = rosa y azul; personal = colores elegidos en el panel */
+export type Tema = 'neutro' | 'clasico' | 'personal';
+
+/** Los 4 colores base de una paleta personal, en hexadecimal (#RRGGBB). */
+export interface Colores {
+  nina: string;
+  nino: string;
+  /** Texto, títulos y botones */
+  tinta: string;
+  /** Fondo de la página */
+  papel: string;
+}
 
 export interface Evento {
   id: string;
@@ -19,11 +29,12 @@ export interface Evento {
   es_prueba: boolean;
   /** Puede faltar si la migración del tema aún no se aplica */
   tema?: Tema;
+  colores?: Colores | null;
 }
 
 export type EventoEditable = Pick<
   Evento,
-  'fecha_hora' | 'lugar' | 'direccion' | 'nota' | 'nombres_papas' | 'telefono' | 'galeria_visible' | 'invitados_suben_fotos' | 'tema'
+  'fecha_hora' | 'lugar' | 'direccion' | 'nota' | 'nombres_papas' | 'telefono' | 'galeria_visible' | 'invitados_suben_fotos' | 'tema' | 'colores'
 >;
 
 export interface Prediccion {

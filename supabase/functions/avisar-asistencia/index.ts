@@ -11,7 +11,7 @@
 //   AVISO_REMITENTE  opcional, por defecto "Revelación <avisos@aldosoto.dev>"
 //   PANEL_URL        opcional, por defecto "https://revelacion.aldosoto.dev/panel"
 import { createClient } from 'npm:@supabase/supabase-js@2.45.4';
-import { armarCorreo, type Respuesta, type Tema } from './plantilla.ts';
+import { armarCorreo, type Colores, type Respuesta, type Tema } from './plantilla.ts';
 
 interface Fila {
   id: string;
@@ -87,8 +87,12 @@ Deno.serve(async (req) => {
     else t.no += 1;
   }
 
-  const { data: ev } = await sb.from('eventos').select('tema').eq('id', f.evento_id).maybeSingle<{ tema: Tema | null }>();
-  const correo = armarCorreo(f, anterior, t, ev?.tema === 'clasico' ? 'clasico' : 'neutro', PANEL);
+  const { data: ev } = await sb
+    .from('eventos')
+    .select('tema, colores')
+    .eq('id', f.evento_id)
+    .maybeSingle<{ tema: Tema | null; colores: Colores | null }>();
+  const correo = armarCorreo(f, anterior, t, ev?.tema ?? 'neutro', PANEL, ev?.colores);
 
   const r = await fetch('https://api.resend.com/emails', {
     method: 'POST',

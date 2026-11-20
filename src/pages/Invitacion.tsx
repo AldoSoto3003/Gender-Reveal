@@ -9,13 +9,13 @@ import { Celebracion } from '../features/revelacion/Celebracion';
 import { Recuerdos } from '../features/recuerdos/Recuerdos';
 import { useInvitacion } from '../hooks/useInvitacion';
 import { api } from '../lib/api';
-import { temaDe, useTema } from '../lib/tema';
+import { useTema } from '../lib/tema';
 import type { MiPrediccion } from '../lib/types';
 import '../styles/invitacion.css';
 
 export function Invitacion() {
   const { evento, predicciones, historia, recuerdos, error } = useInvitacion();
-  useTema(evento ? temaDe(evento) : null);
+  useTema(evento);
   const [mia, setMia] = useState<MiPrediccion | null>(null);
   // El resto de la invitación solo existe después de abrir el sobre.
   const [abierto, setAbierto] = useState(false);

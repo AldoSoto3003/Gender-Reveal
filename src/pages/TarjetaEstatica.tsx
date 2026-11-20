@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { api } from '../lib/api';
-import { temaDe, useTema } from '../lib/tema';
+import { useTema } from '../lib/tema';
 import type { Evento } from '../lib/types';
 import { Tarjeta } from '../ui/Tarjeta';
 
@@ -10,7 +10,7 @@ import { Tarjeta } from '../ui/Tarjeta';
  */
 export function TarjetaEstatica() {
   const [evento, setEvento] = useState<Evento | null>(null);
-  useTema(evento ? temaDe(evento) : null);
+  useTema(evento);
 
   useEffect(() => {
     document.title = 'Invitación';
