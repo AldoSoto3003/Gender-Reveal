@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { temaDe } from '../../lib/tema';
 import type { Evento } from '../../lib/types';
 import { Portada } from './Portada';
 import './portada.css';
@@ -45,6 +46,8 @@ export function EscenaSobre({ evento, onAbierto, reinicio }: Props) {
   const [animado, setAnimado] = useState(true);
   const tiempos = useRef<number[]>([]);
   const ultimoReinicio = useRef(reinicio);
+  // Las ilustraciones del sobre traen sus colores dentro: hay una versión por tema.
+  const sufijo = temaDe(evento) === 'clasico' ? '-clasico' : '';
 
   const limpiar = () => {
     tiempos.current.forEach((t) => clearTimeout(t));
@@ -92,8 +95,8 @@ export function EscenaSobre({ evento, onAbierto, reinicio }: Props) {
             <path d="M0 100L50 55L100 100Z" fill="#FFFFFF" fillOpacity=".12" />
             <path d="M100 0L50 58L100 100Z" fill="#2C3624" fillOpacity=".05" />
           </svg>
-          <img className="sb-ilus sb-ilus-i" src="/sobre/globos.svg" alt="" />
-          <img className="sb-ilus sb-ilus-d" src="/sobre/zapatitos.svg" alt="" />
+          <img className="sb-ilus sb-ilus-i" src={`/sobre/globos${sufijo}.svg`} alt="" />
+          <img className="sb-ilus sb-ilus-d" src={`/sobre/zapatitos${sufijo}.svg`} alt="" />
           <div className="sb-luz" />
         </div>
       </div>

@@ -18,9 +18,43 @@
   --tinta-nino: #46652e;
   --oro: #c9a24e;
   --error: #9b3a1c;
+  --boton-texto: #f6f4e8;
+  /* sobre */
+  --sobre-papel: #cdd2b1;
+  --sobre-solapa: #c2c9a2;
+  --sobre-forro: #f1eedb;
+  --sobre-pista: #4b5540;
+  --sombra: 44, 54, 36;
   --mano: 'Bricolage Grotesque', 'Avenir Next', 'Segoe UI', system-ui, sans-serif;
   --display: var(--mano);
   --sans: 'Figtree', system-ui, -apple-system, 'Segoe UI', sans-serif;
+}
+
+/* Tema "Rosa y azul": mismos componentes, otra paleta. Se activa desde el panel (eventos.tema). */
+:root[data-tema='clasico'] {
+  --mesa: #e9e2d8;
+  --papel: #f7f4ef;
+  --papel-tarjeta: #fdfcfa;
+  --campo: rgba(78, 90, 110, 0.07);
+  --linea: rgba(78, 90, 110, 0.16);
+  --tinta: #3b4558;
+  --tinta-fuerte: #2a3242;
+  --texto: #3b4558;
+  --texto-suave: #5f6573;
+  --texto-tenue: #737885;
+  --globo-nina: #f2a9a0;
+  --globo-nino: #9db6db;
+  --claro-nina: #f7d4cf;
+  --claro-nino: #cfdcef;
+  --tinta-nina: #b2443e;
+  --tinta-nino: #34507a;
+  --error: #a2392f;
+  --boton-texto: #fbf8f3;
+  --sobre-papel: #eee5d5;
+  --sobre-solapa: #f2eadc;
+  --sobre-forro: #f6eee4;
+  --sobre-pista: #876f50;
+  --sombra: 60, 52, 44;
 }
 
 *,
@@ -82,7 +116,7 @@ a:hover {
   border: 0;
   border-radius: 999px;
   background: var(--tinta);
-  color: #f6f4e8;
+  color: var(--boton-texto);
   font-family: var(--sans);
   font-weight: 600;
   letter-spacing: 0.01em;
@@ -100,7 +134,7 @@ a:hover {
 
 .btn:hover {
   background: var(--tinta-fuerte);
-  color: #f6f4e8;
+  color: var(--boton-texto);
   transform: translateY(-2px);
 }
 

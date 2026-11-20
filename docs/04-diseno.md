@@ -32,6 +32,10 @@ Paleta neutra sin azules ni rosas: avena, olivo, miel (niña) y salvia (niño). 
 | `--oro` | `#C9A24E` | Brillos, hilos y sello |
 | sobre | `#CDD2B1` | Papel del sobre (salvia) |
 
+### Tema "Rosa y azul"
+
+Desde el panel (**Datos del evento → Colores de la invitación**) los papás pueden cambiar a la paleta rosa (niña) y azul (niño). Se guarda en `eventos.tema` (`neutro` o `clasico`) y todos los invitados la ven al momento. Los mismos tokens se redefinen bajo `:root[data-tema='clasico']` en `base.css`; los SVG toman el color de las variables CSS y las ilustraciones del sobre tienen una versión `-clasico.svg`.
+
 Las secciones no usan hojas ni tarjetas encimadas: se separan con aire, una línea de 1 px y tipografía.
 
 ## Tipografía

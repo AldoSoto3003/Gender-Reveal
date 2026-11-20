@@ -1,5 +1,8 @@
 export type Sexo = 'nina' | 'nino';
 
+/** neutro = miel y salvia; clasico = rosa y azul */
+export type Tema = 'neutro' | 'clasico';
+
 export interface Evento {
   id: string;
   fecha_hora: string;
@@ -14,11 +17,13 @@ export interface Evento {
   galeria_visible: boolean;
   invitados_suben_fotos: boolean;
   es_prueba: boolean;
+  /** Puede faltar si la migración del tema aún no se aplica */
+  tema?: Tema;
 }
 
 export type EventoEditable = Pick<
   Evento,
-  'fecha_hora' | 'lugar' | 'direccion' | 'nota' | 'nombres_papas' | 'telefono' | 'galeria_visible' | 'invitados_suben_fotos'
+  'fecha_hora' | 'lugar' | 'direccion' | 'nota' | 'nombres_papas' | 'telefono' | 'galeria_visible' | 'invitados_suben_fotos' | 'tema'
 >;
 
 export interface Prediccion {

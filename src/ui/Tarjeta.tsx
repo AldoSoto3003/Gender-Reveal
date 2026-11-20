@@ -40,16 +40,16 @@ export function Tarjeta({ evento, className }: { evento: Evento; className?: str
       <use href="#bal" x={30} y={20} width={280} height={364} style={{ color: NINA }} />
       <use href="#bal" x={300} y={152} width={270} height={351} style={{ color: NINO }} />
       <g fontFamily="Bricolage Grotesque, Avenir Next, Segoe UI, sans-serif" fontWeight={700} textAnchor="middle">
-        <g fill={TINTA_NINA} fontSize={46} fontWeight={800} letterSpacing={0} transform="rotate(-4 168 175)">
+        <g style={{ fill: TINTA_NINA }} fontSize={46} fontWeight={800} letterSpacing={0} transform="rotate(-4 168 175)">
           <text x={168} y={138}>¿NIÑA</text>
           <text x={168} y={186}>O</text>
           <text x={168} y={234}>NIÑO?</text>
         </g>
-        <g fill={TINTA_NINO} fontSize={46} fontWeight={800} letterSpacing={0} transform="rotate(4 436 300)">
+        <g style={{ fill: TINTA_NINO }} fontSize={46} fontWeight={800} letterSpacing={0} transform="rotate(4 436 300)">
           <text x={436} y={286}>¿QUÉ</text>
           <text x={436} y={336}>SERÁ?</text>
         </g>
-        <g fill="#2C3624" letterSpacing={1.5}>
+        <g style={{ fill: 'var(--tinta)' }} letterSpacing={1.5}>
           <Linea y={560} texto="ACOMPÁÑANOS A LA" base={23} />
           <Linea y={612} texto="REVELACIÓN DE GÉNERO" base={44} />
           {papas && <Linea y={652} texto={`DE ${papas.toUpperCase()}`} base={23} />}

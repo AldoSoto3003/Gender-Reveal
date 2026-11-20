@@ -30,6 +30,7 @@ eventos 1 ─── 1 resultado_sellado        (privada, sin lectura)
 | `resultado` | `text` | `null` hasta revelar; luego `'nina'` o `'nino'` |
 | `revelado_en` | `timestamptz` | |
 | `galeria_visible` | `boolean` | Muestra "Recuerdos del día" |
+| `tema` | `text` | Colores de la invitación: `neutro` (miel y salvia) o `clasico` (rosa y azul). Lo cambian los papás desde el panel |
 | `invitados_suben_fotos` | `boolean` | |
 
 ### `resultado_sellado` (privada)

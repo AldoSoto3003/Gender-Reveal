@@ -130,10 +130,10 @@ export function SvgDefs() {
   );
 }
 
-/** Globo de niña: amarillo miel. */
-export const NINA = '#E3B23C';
-/** Globo de niño: verde salvia. */
-export const NINO = '#9FB583';
-/** Texto legible sobre el papel para cada lado. */
-export const TINTA_NINA = '#845F06';
-export const TINTA_NINO = '#46652E';
+/* Colores por lado. Son variables CSS para que sigan el tema elegido en el panel (ver base.css). */
+export const NINA = 'var(--globo-nina)';
+export const NINO = 'var(--globo-nino)';
+export const CLARO_NINA = 'var(--claro-nina)';
+export const CLARO_NINO = 'var(--claro-nino)';
+export const TINTA_NINA = 'var(--tinta-nina)';
+export const TINTA_NINO = 'var(--tinta-nino)';

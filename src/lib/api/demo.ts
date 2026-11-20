@@ -47,6 +47,7 @@ function inicial(): Estado {
       galeria_visible: false,
       invitados_suben_fotos: true,
       es_prueba: true,
+      tema: 'neutro',
     },
     predicciones: [
       pred('Tía Lupita', 'nina', 50), pred('Abuela Tere', 'nino', 46), pred('Mariana', 'nina', 40),

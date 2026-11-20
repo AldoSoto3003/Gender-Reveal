@@ -1,7 +1,7 @@
 import { titulo } from '../../lib/formato';
 import type { Sexo } from '../../lib/types';
 import { Globo } from '../../ui/Globo';
-import { NINA, NINO } from '../../ui/SvgDefs';
+import { CLARO_NINA, CLARO_NINO, NINA, NINO } from '../../ui/SvgDefs';
 
 const GLOBOS = Array.from({ length: 16 }, (_, i) => ({
   l: 3 + ((i * 59) % 92),
@@ -20,7 +20,7 @@ const BRILLO = Array.from({ length: 46 }, (_, i) => ({
 /** Globos que suben y brillo dorado que cae. Se usa en la invitación y en el ensayo del panel. */
 export function Lluvia({ sexo }: { sexo: Sexo }) {
   const color = sexo === 'nina' ? NINA : NINO;
-  const claro = sexo === 'nina' ? '#F3D98D' : '#CFDCBC';
+  const claro = sexo === 'nina' ? CLARO_NINA : CLARO_NINO;
   return (
     <>
       <div className="glit" aria-hidden="true">

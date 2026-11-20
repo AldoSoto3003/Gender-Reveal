@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { fechaLarga, hora } from '../../lib/formato';
 import type { Evento } from '../../lib/types';
-import { NINA, NINO } from '../../ui/SvgDefs';
+import { CLARO_NINA, NINA, NINO } from '../../ui/SvgDefs';
 
 function useCuenta(iso: string) {
   const [ahora, setAhora] = useState(() => Date.now());
@@ -58,7 +58,7 @@ export function Portada({ evento }: { evento: Evento }) {
       <div className="pt-globos" aria-hidden="true">
         <Globo color={NINA} className="pt-g1" />
         <Globo color={NINO} className="pt-g2" />
-        <Globo color="#F3D98D" className="pt-g3" />
+        <Globo color={CLARO_NINA} className="pt-g3" />
       </div>
 
       <div className="pt-texto">

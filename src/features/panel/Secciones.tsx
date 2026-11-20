@@ -3,7 +3,8 @@ import { api, mensajeError } from '../../lib/api';
 import { aIso, fechaCorta, fechaHoraCorta, fechaLarga, hora, partesLocales, titulo } from '../../lib/formato';
 import { reducirFoto } from '../../lib/imagen';
 import { appleMaps, googleMaps } from '../../lib/mapas';
-import type { Asistencia, FotoHistoria, FotoRecuerdo, Respuesta, Sexo } from '../../lib/types';
+import { TEMAS, temaDe } from '../../lib/tema';
+import type { Asistencia, Evento, FotoHistoria, FotoRecuerdo, Respuesta, Sexo, Tema } from '../../lib/types';
 import { Lluvia } from '../revelacion/Celebracion';
 import type { DatosPanel } from './usePanel';
 
@@ -256,6 +257,58 @@ export function Confirmaciones({ d, avisar }: Pick<Props, 'd' | 'avisar'>) {
 
 /* ------------------------------------------------------------------ */
 
+/** Los papás eligen la paleta de la invitación; el cambio llega a todos los invitados al momento. */
+function ElegirTema({ ev, recargar, avisar }: { ev: Evento } & Pick<Props, 'recargar' | 'avisar'>) {
+  const actual = temaDe(ev);
+  const [guardando, setGuardando] = useState<Tema | null>(null);
+
+  async function elegir(t: Tema) {
+    if (t === actual || guardando) return;
+    setGuardando(t);
+    try {
+      await api.actualizarEvento({ tema: t });
+      await recargar();
+      avisar(`Listo: la invitación ahora se ve en ${TEMAS.find((x) => x.valor === t)?.nombre.toLowerCase()}.`);
+    } catch (e) {
+      avisar(mensajeError(e));
+    } finally {
+      setGuardando(null);
+    }
+  }
+
+  return (
+    <div className="card">
+      <p className="h3">Colores de la invitación</p>
+      <p className="help">Cámbienlos cuando quieran para comparar. Todos los invitados ven el cambio al momento.</p>
+      <div className="temas" role="radiogroup" aria-label="Colores de la invitación">
+        {TEMAS.map((t) => (
+          <button
+            key={t.valor}
+            type="button"
+            role="radio"
+            aria-checked={actual === t.valor}
+            className={`tema${actual === t.valor ? ' on' : ''}`}
+            disabled={!!guardando}
+            onClick={() => void elegir(t.valor)}
+          >
+            <span className="tema-muestra" style={{ background: t.fondo }} aria-hidden="true">
+              <i style={{ background: t.nina }} />
+              <i style={{ background: t.nino }} />
+            </span>
+            <span className="tema-txt">
+              <strong>{t.nombre}</strong>
+              <small>{guardando === t.valor ? 'Guardando…' : t.detalle}</small>
+            </span>
+          </button>
+        ))}
+      </div>
+      <a className="btn btn-o btn-sm tema-ver" href="/" target="_blank" rel="noopener noreferrer">
+        Ver la invitación
+      </a>
+    </div>
+  );
+}
+
 export function DatosEvento({ d, recargar, avisar }: Props) {
   const ev = d.evento;
   const [f, setF] = useState<{ fecha: string; hora: string; lugar: string; direccion: string; nota: string; papas: string; telefono: string } | null>(
@@ -342,6 +395,7 @@ export function DatosEvento({ d, recargar, avisar }: Props) {
           </div>
         </div>
         <div>
+          <ElegirTema ev={ev} recargar={recargar} avisar={avisar} />
           <div className="card">
             <p className="h3">Así se verá en la tarjeta</p>
             <div className="prev">
