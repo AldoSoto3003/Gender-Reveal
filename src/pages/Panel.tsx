@@ -8,13 +8,13 @@ import '../styles/panel.css';
 
 type Tab = 'resumen' | 'rsvp' | 'evento' | 'hist' | 'mem' | 'rev';
 
-const TABS: { id: Tab; label: string; icon: string }[] = [
-  { id: 'resumen', label: 'Resumen', icon: 'M4 13h6V4H4zM14 20h6v-9h-6zM4 20h6v-3H4zM14 7h6V4h-6z' },
-  { id: 'rsvp', label: 'Confirmaciones', icon: 'M16 11a4 4 0 1 0-8 0M4 20c0-3.3 3.6-6 8-6s8 2.7 8 6' },
-  { id: 'evento', label: 'Datos del evento', icon: 'M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z' },
-  { id: 'hist', label: 'Nuestra historia', icon: 'M4 5h16v14H4zM4 15l5-4 4 3 3-2 4 3' },
-  { id: 'mem', label: 'Recuerdos del día', icon: 'M3 8h4l2-3h6l2 3h4v11H3zM12 17a4 4 0 1 0 0-8 4 4 0 0 0 0 8z' },
-  { id: 'rev', label: 'La revelación', icon: 'M4 8h16v12H4zM2 5h20v3H2zM12 5v15' },
+const TABS: { id: Tab; label: string; corto: string; icon: string }[] = [
+  { id: 'resumen', corto: 'Inicio', label: 'Resumen', icon: 'M4 13h6V4H4zM14 20h6v-9h-6zM4 20h6v-3H4zM14 7h6V4h-6z' },
+  { id: 'rsvp', corto: 'Asistencia', label: 'Confirmaciones', icon: 'M16 11a4 4 0 1 0-8 0M4 20c0-3.3 3.6-6 8-6s8 2.7 8 6' },
+  { id: 'evento', corto: 'Evento', label: 'Datos del evento', icon: 'M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z' },
+  { id: 'hist', corto: 'Historia', label: 'Nuestra historia', icon: 'M4 5h16v14H4zM4 15l5-4 4 3 3-2 4 3' },
+  { id: 'mem', corto: 'Fotos', label: 'Recuerdos del día', icon: 'M3 8h4l2-3h6l2 3h4v11H3zM12 17a4 4 0 1 0 0-8 4 4 0 0 0 0 8z' },
+  { id: 'rev', corto: 'Revelar', label: 'La revelación', icon: 'M4 8h16v12H4zM2 5h20v3H2zM12 5v15' },
 ];
 
 function Globito() {
@@ -178,6 +178,8 @@ export function Panel() {
   const [tab, setTab] = useState<Tab>('resumen');
   const [toast, setToast] = useState<string | null>(null);
   const [cambiandoPass, setCambiandoPass] = useState(false);
+  // Menú "Más" del celular (en escritorio esas opciones siempre están abajo del menú lateral).
+  const [mas, setMas] = useState(false);
 
   const revisar = useCallback(() => {
     api
@@ -233,24 +235,44 @@ export function Panel() {
       <aside className="side">
         <div className="brand">
           <Globito />
-          <div>
+          <div className="brand-txt">
             <p className="brand-t">Panel de los papás</p>
             <p className="brand-s">{api.modo === 'demo' ? 'Modo demo' : 'Solo ustedes ven esto'}</p>
           </div>
+          <button
+            type="button"
+            className={`mas${mas ? ' on' : ''}`}
+            aria-expanded={mas}
+            aria-controls="side-foot"
+            aria-label="Más opciones"
+            onClick={() => setMas(!mas)}
+          >
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+              <circle cx="5" cy="12" r="2" />
+              <circle cx="12" cy="12" r="2" />
+              <circle cx="19" cy="12" r="2" />
+            </svg>
+          </button>
         </div>
         <nav className="nav" aria-label="Secciones del panel">
           {TABS.map((t) => (
-            <button key={t.id} type="button" className={`tab${tab === t.id ? ' on' : ''}`} aria-current={tab === t.id ? 'page' : undefined} onClick={() => setTab(t.id)}>
+            <button key={t.id} type="button" className={`tab${tab === t.id ? ' on' : ''}`} aria-current={tab === t.id ? 'page' : undefined} onClick={() => {
+                setTab(t.id);
+                setMas(false);
+                window.scrollTo({ top: 0 });
+              }}>
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                 <path d={t.icon} />
               </svg>
-              <span>{t.label}</span>
+              <span className="tab-l">{t.label}</span>
+              <span className="tab-c">{t.corto}</span>
               {t.id === 'rsvp' && datos.asistencias.length > 0 && <span className="badge">{datos.asistencias.length}</span>}
               {t.id === 'mem' && pendientes > 0 && <span className="badge">{pendientes}</span>}
             </button>
           ))}
         </nav>
-        <div className="side-foot">
+        {mas && <div className="mas-fondo" onClick={() => setMas(false)} aria-hidden="true" />}
+        <div className={`side-foot${mas ? ' abierto' : ''}`} id="side-foot">
           <a href="/" target="_blank" rel="noopener noreferrer">
             Ver la invitación
           </a>
@@ -261,7 +283,14 @@ export function Panel() {
           {api.modo === 'supabase' && (
             <>
               <br />
-              <button type="button" className="side-out" onClick={() => setCambiandoPass(true)}>
+              <button
+                type="button"
+                className="side-out"
+                onClick={() => {
+                  setMas(false);
+                  setCambiandoPass(true);
+                }}
+              >
                 Cambiar contraseña
               </button>
               <br />
