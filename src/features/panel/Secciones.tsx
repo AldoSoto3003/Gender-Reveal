@@ -257,6 +257,19 @@ export function Confirmaciones({ d, avisar }: Pick<Props, 'd' | 'avisar'>) {
 
 /* ------------------------------------------------------------------ */
 
+/** Imagen que, si el navegador no la puede mostrar (p. ej. una HEIC subida antes), lo explica en vez de verse rota. */
+function FotoSegura({ src, alt }: { src: string; alt: string }) {
+  const [rota, setRota] = useState(false);
+  if (rota) {
+    return (
+      <span className="foto-rota">
+        Este navegador no puede mostrar esta foto (probablemente es HEIC del iPhone). Quítala y vuelve a subirla.
+      </span>
+    );
+  }
+  return <img src={src} alt={alt} onError={() => setRota(true)} />;
+}
+
 /** Los papás eligen la paleta de la invitación; el cambio llega a todos los invitados al momento. */
 function ElegirTema({ ev, recargar, avisar }: { ev: Evento } & Pick<Props, 'recargar' | 'avisar'>) {
   const actual = temaDe(ev);
@@ -501,7 +514,7 @@ export function Historia({ d, recargar, avisar }: Props) {
           <div className="ph" key={f.id}>
             <div className={`ph-img ${f.url ? '' : f.tipo === 'ecografia' ? 'tn-us' : 'tn1'}`}>
               <span className="ph-n">{i + 1}</span>
-              {f.url ? <img src={f.url} alt={f.titulo} /> : <span>{f.tipo === 'ecografia' ? 'Ecografía de muestra' : 'Foto de muestra'}</span>}
+              {f.url ? <FotoSegura src={f.url} alt={f.titulo} /> : <span>{f.tipo === 'ecografia' ? 'Ecografía de muestra' : 'Foto de muestra'}</span>}
             </div>
             <div className="ph-b">
               <input type="text" defaultValue={f.titulo} maxLength={80} aria-label="Título de la foto" onBlur={(e) => e.target.value !== f.titulo && void editar(f, { titulo: e.target.value })} />
@@ -583,7 +596,7 @@ export function Recuerdos({ d, recargar, avisar }: Props) {
 
   const Tarjeta = ({ f, children }: { f: FotoRecuerdo; children?: React.ReactNode }) => (
     <div className="pd">
-      <div className="pd-img">{f.url ? <img src={f.url} alt={`Foto de ${f.subida_por}`} /> : 'Foto'}</div>
+      <div className="pd-img">{f.url ? <FotoSegura src={f.url} alt={`Foto de ${f.subida_por}`} /> : 'Foto'}</div>
       <div className="pd-b">
         <span>
           De <strong>{f.subida_por || 'Invitado'}</strong>
