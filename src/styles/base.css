@@ -299,3 +299,91 @@ a:hover {
     transition-delay: 0s !important;
   }
 }
+
+/* Select propio (src/ui/Selector.tsx). Nunca usamos el <select> nativo. */
+.sel {
+  position: relative;
+  display: inline-block;
+  min-width: 0;
+}
+
+.sel-boton {
+  appearance: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  width: 100%;
+  min-height: 40px;
+  padding: 6px 12px;
+  border: 1px solid var(--linea);
+  border-radius: 10px;
+  background: var(--papel-tarjeta);
+  color: var(--texto);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 0.2s, background-color 0.2s;
+}
+
+.sel-boton:hover:not(:disabled) { background: var(--campo); }
+.sel-boton:disabled { opacity: 0.5; cursor: not-allowed; }
+.sel.abierto .sel-boton { border-color: var(--tinta); }
+
+.sel-valor {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sel-flecha {
+  flex: none;
+  color: var(--texto-suave);
+  transition: transform 0.2s;
+}
+
+.sel.abierto .sel-flecha { transform: rotate(180deg); }
+
+.sel-lista {
+  position: fixed;
+  z-index: 200;
+  max-height: 280px;
+  overflow-y: auto;
+  margin: 0;
+  padding: 5px;
+  list-style: none;
+  border: 1px solid var(--linea);
+  border-radius: 12px;
+  background: var(--papel-tarjeta);
+  box-shadow: 0 12px 28px -10px rgba(0, 0, 0, 0.25);
+  animation: sel-entra 0.14s ease-out;
+}
+
+.sel-lista:focus { outline: none; }
+
+@keyframes sel-entra {
+  from { opacity: 0; transform: translateY(-4px); }
+}
+
+.sel-op {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 9px 10px;
+  border-radius: 8px;
+  color: var(--texto);
+  font-size: 14px;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.sel-op.activa { background: var(--campo); }
+.sel-op[aria-selected='true'] { font-weight: 600; }
+.sel-op svg { flex: none; color: var(--tinta); }
+
+.sel-op-txt { display: grid; }
+.sel-op-txt small { font-size: 12px; font-weight: 400; color: var(--texto-suave); }
