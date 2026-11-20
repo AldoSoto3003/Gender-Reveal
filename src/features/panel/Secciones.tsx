@@ -762,8 +762,11 @@ export function LaRevelacion({ d, recargar, avisar }: Props) {
                 type="button"
                 className="btn btn-o btn-sm"
                 onClick={() => {
-                  void navigator.clipboard?.writeText(`${link.url}\nPIN: ${link.pin}`);
-                  avisar('Link y PIN copiados');
+                  // Mensaje listo para WhatsApp: el link va solo en su línea para que no se mezcle con el PIN.
+                  void navigator.clipboard?.writeText(
+                    `Eres el guardián del sobre 🤫\n\nAbre este link:\n${link.url}\n\nY escribe este PIN: ${link.pin}`,
+                  );
+                  avisar('Mensaje con link y PIN copiado');
                 }}
               >
                 Copiar

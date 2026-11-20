@@ -8,7 +8,10 @@ import '../styles/panel.css';
 type Paso = 'pin' | 'elegir' | 'confirmar' | 'listo';
 
 export function Guardian() {
-  const { token = '' } = useParams();
+  const { token: crudo = '' } = useParams();
+  // El token es hexadecimal. Si alguien pegó el link junto con "PIN: 1234" (o con espacios
+  // o puntos de WhatsApp), se queda solo con la parte válida.
+  const token = (crudo.match(/^[0-9a-f]+/i)?.[0] ?? '').toLowerCase();
   const [info, setInfo] = useState<GuardianInfo | null | undefined>(undefined);
   const [pin, setPin] = useState('');
   const [paso, setPaso] = useState<Paso>('pin');
