@@ -64,3 +64,8 @@ export function partesFecha(iso: string): { dia: string; mes: string; semana: st
   const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
   return { dia: p({ day: 'numeric' }), mes: cap(p({ month: 'long' })), semana: cap(p({ weekday: 'long' })), anio: p({ year: 'numeric' }) };
 }
+
+/** Inicio (00:00, hora de CDMX) del día de una fecha. Igual que la regla de la base para abrir las fotos. */
+export function inicioDelDia(iso: string): number {
+  return Date.parse(aIso(partesLocales(iso).fecha, '00:00'));
+}

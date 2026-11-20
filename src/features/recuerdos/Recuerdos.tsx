@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type ChangeEvent } from 'react';
-import { diaMes } from '../../lib/formato';
+import { diaMes, inicioDelDia } from '../../lib/formato';
 import { api, mensajeError } from '../../lib/api';
 import { reducirFoto } from '../../lib/imagen';
 import type { Evento, FotoRecuerdo } from '../../lib/types';
@@ -15,6 +15,9 @@ export function Recuerdos({ evento, fotos, nombreSugerido }: Props) {
   const [nombre, setNombre] = useState(nombreSugerido ?? '');
   const [nombreTocado, setNombreTocado] = useState(false);
   const dia = diaMes(evento.fecha_hora);
+  // Las fotos de invitados se abren el día del evento (la base aplica la misma regla).
+  const abiertas = Date.now() >= inicioDelDia(evento.fecha_hora);
+  const muyPronto = !abiertas && fotos.length === 0;
 
   // La predicción puede llegar o cambiar después de montar la sección.
   useEffect(() => {
@@ -52,19 +55,40 @@ export function Recuerdos({ evento, fotos, nombreSugerido }: Props) {
       <div className="wrap">
         <div className="sec-cab">
           <div>
-            <span className="tag">{evento.galeria_visible ? 'Galería' : 'Después de la fiesta'}</span>
+            <span className="tag">{muyPronto ? 'Muy pronto' : evento.galeria_visible ? 'Galería' : 'Después de la fiesta'}</span>
             <h2 className="h2" id="h-mem">
               Recuerdos del {dia}
             </h2>
           </div>
           <p>
-            {evento.galeria_visible
+            {muyPronto
+              ? 'Un álbum compartido para guardar juntos el momento en que por fin lo sepamos.'
+              : evento.galeria_visible
               ? 'Fotos de la familia y de los invitados. Sube las tuyas para que todos las vean.'
               : 'Aquí estarán todas las fotos de la fiesta. Tú también podrás subir las que tomes.'}
           </p>
         </div>
 
-        {!evento.galeria_visible ? (
+        {muyPronto ? (
+          <div className="pronto">
+            <div className="pronto-sello" aria-hidden="true">
+              <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="5" y="11" width="14" height="10" rx="2" />
+                <path d="M8 11V8a4 4 0 0 1 8 0v3" />
+              </svg>
+            </div>
+            <p className="pronto-t">Este rincón está guardado para el {dia}.</p>
+            <p className="pronto-p">
+              Ese día, en el momento en que por fin sepamos si es niña o niño, aquí vamos a juntar todo lo que no queremos olvidar: las
+              caras de sorpresa, los gritos, alguna lágrima de felicidad y muchos abrazos.
+            </p>
+            <p className="pronto-p">
+              Trae tu celular con batería. El {dia} se abre este espacio para que subas tus fotos y las de todos queden juntas, para
+              siempre, en el primer álbum de nuestro bebé.
+            </p>
+            <p className="pronto-firma">Se abre el {dia}</p>
+          </div>
+        ) : !evento.galeria_visible ? (
           <>
             <div className="mem-lock">
               <div aria-hidden="true" />
@@ -80,7 +104,7 @@ export function Recuerdos({ evento, fotos, nombreSugerido }: Props) {
           </>
         ) : (
           <>
-            {evento.invitados_suben_fotos && (
+            {evento.invitados_suben_fotos && abiertas && (
               <div className="upload">
                 <div className="campo">
                   <label className="lbl" htmlFor="mn">

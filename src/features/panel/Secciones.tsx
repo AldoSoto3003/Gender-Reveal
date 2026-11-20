@@ -630,7 +630,7 @@ export function Recuerdos({ d, recargar, avisar }: Props) {
           <div className="sw">
             <div>
               <p className="sw-t">Los invitados pueden subir fotos</p>
-              <p className="sw-d">Sus fotos esperan aquí hasta que ustedes las aprueben.</p>
+              <p className="sw-d">Se abre a partir del día del evento. Sus fotos esperan aquí hasta que ustedes las aprueben.</p>
             </div>
             <Interruptor on={ev.invitados_suben_fotos} label="Permitir fotos de invitados" onClick={() => void alternar('invitados_suben_fotos')} />
           </div>

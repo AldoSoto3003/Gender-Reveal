@@ -940,3 +940,47 @@
   .mem-lock { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .mem-lock > div:nth-child(3) { display: none; }
 }
+
+/* recuerdos antes del día del evento */
+.pronto {
+  display: grid;
+  gap: 16px;
+  max-width: 620px;
+}
+
+.pronto-sello {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: var(--mesa);
+  color: var(--texto-suave);
+}
+
+.pronto-t {
+  margin: 6px 0 0;
+  font-family: var(--display);
+  font-weight: 700;
+  font-size: clamp(26px, 3.6vw, 36px);
+  line-height: 1.1;
+  letter-spacing: -0.03em;
+  text-wrap: balance;
+}
+
+.pronto-p {
+  margin: 0;
+  font-size: 18px;
+  line-height: 1.65;
+  color: var(--texto-suave);
+  text-wrap: pretty;
+}
+
+.pronto-firma {
+  margin: 8px 0 0;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--texto-tenue);
+}
