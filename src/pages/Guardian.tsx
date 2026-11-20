@@ -13,7 +13,18 @@ export function Guardian() {
   // o puntos de WhatsApp), se queda solo con la parte válida.
   const token = (crudo.match(/^[0-9a-f]+/i)?.[0] ?? '').toLowerCase();
   const [info, setInfo] = useState<GuardianInfo | null | undefined>(undefined);
-  const [pin, setPin] = useState('');
+  // Si el link trae el PIN pegado ("…/guardian/abc PIN: 1234" o "?pin=1234"), se precarga.
+  const [pin, setPin] = useState(() => {
+    const deRuta = crudo.match(/pin\D{0,3}(\d{4})/i)?.[1];
+    const deQuery = new URLSearchParams(window.location.search).get('pin')?.match(/^\d{4}$/)?.[0];
+    return deRuta ?? deQuery ?? '';
+  });
+
+  // Deja la dirección limpia (sin el PIN) para que no se quede en el historial.
+  useEffect(() => {
+    const limpia = `/guardian/${token}`;
+    if (token && window.location.pathname + window.location.search !== limpia) window.history.replaceState(null, '', limpia);
+  }, [token]);
   const [paso, setPaso] = useState<Paso>('pin');
   const [eleccion, setEleccion] = useState<Sexo | null>(null);
   const [error, setError] = useState<string | null>(null);
