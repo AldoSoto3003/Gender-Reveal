@@ -1,3 +1,4 @@
+import { traducirError } from '../errores';
 import type { Api } from '../types';
 import { crearApiDemo } from './demo';
 import { crearApiSupabase } from './supabase';
@@ -10,5 +11,5 @@ const evento = import.meta.env.VITE_EVENT_ID as string | undefined;
 export const api: Api = url && key && evento ? crearApiSupabase(url, key, evento) : crearApiDemo();
 
 export function mensajeError(e: unknown): string {
-  return e instanceof Error ? e.message : 'Algo salió mal. Intenta de nuevo.';
+  return e instanceof Error && e.message ? traducirError(e.message) : 'Algo salió mal. Intenta de nuevo.';
 }

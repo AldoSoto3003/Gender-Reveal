@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState, type FormEvent } from 'react';
 import { temaDe, useTema } from '../lib/tema';
 import { api, mensajeError } from '../lib/api';
+import { errorDelLink } from '../lib/errores';
 import { usePanel } from '../features/panel/usePanel';
 import { Confirmaciones, DatosEvento, Historia, LaRevelacion, Recuerdos, Resumen } from '../features/panel/Secciones';
 import '../styles/panel.css';
@@ -29,7 +30,8 @@ function Globito() {
 function Entrar() {
   const [email, setEmail] = useState('');
   const [enviado, setEnviado] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  // Si venimos de un link vencido o ya usado, se explica aquí mismo.
+  const [error, setError] = useState<string | null>(() => errorDelLink());
   const [enviando, setEnviando] = useState(false);
 
   async function enviar(e: FormEvent) {
@@ -52,9 +54,15 @@ function Entrar() {
         <Globito />
         <h1 className="h1">Panel de los papás</h1>
         {enviado ? (
-          <p className="lede" role="status">
-            Te mandamos un link a <strong>{email}</strong>. Ábrelo desde este mismo dispositivo para entrar.
-          </p>
+          <div role="status">
+            <p className="lede">
+              Te mandamos un link a <strong>{email}</strong>. Ábrelo desde este mismo navegador para entrar.
+            </p>
+            <p className="muted">
+              Puede tardar un par de minutos; revisa también spam. No pidas otro enseguida: cada link nuevo cancela al anterior y solo se
+              pueden mandar unos cuantos por hora.
+            </p>
+          </div>
         ) : (
           <form onSubmit={enviar}>
             <p className="lede">Escribe tu correo y te mandamos un link para entrar, sin contraseña.</p>
