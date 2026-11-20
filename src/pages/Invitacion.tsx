@@ -62,18 +62,30 @@ export function Invitacion() {
       )}
       <EscenaSobre evento={evento} onAbierto={() => setAbierto(true)} reinicio={reinicio} />
       {abierto && (
-      <main className="page">
-        <svg className="paper" aria-hidden="true">
-          <rect width="100%" height="100%" filter="url(#paperLit)" />
-        </svg>
+      <>
+      <header className="barra">
+        <div className="wrap barra-in">
+          <span className="marca">
+            <i>Niña</i> o <em>niño</em>
+          </span>
+          <nav className="barra-nav" aria-label="Secciones">
+            {historia.length > 0 && <a href="#historia">Historia</a>}
+            <a href="#votar">Predicción</a>
+            <a href="#detalles">Detalles</a>
+            <a href="#confirmar">Confirmar</a>
+            <a href="#revelacion">Revelación</a>
+          </nav>
+        </div>
+      </header>
+      <main className="page" id="contenido">
         <Historia fotos={historia} />
         <Prediccion evento={evento} mia={mia} onCambio={setMia} />
-        <Conteo predicciones={predicciones} miNombre={mia?.nombre} />
+        <Conteo predicciones={predicciones} mia={mia} />
         <Detalles evento={evento} nombreSugerido={mia?.nombre} />
         <Revelacion evento={evento} predicciones={predicciones} mia={mia} />
         <Recuerdos evento={evento} fotos={recuerdos} nombreSugerido={mia?.nombre} />
         <footer className="foot">
-          {evento.nombres_papas && <p className="sig">Con cariño, {evento.nombres_papas}</p>}
+          <p className="sig">Con cariño, {evento.nombres_papas.trim() || 'los futuros papás'}</p>
           <button
             type="button"
             className="lnk"
@@ -87,6 +99,7 @@ export function Invitacion() {
           </button>
         </footer>
       </main>
+      </>
       )}
       {fiesta && evento.resultado && (
         <Celebracion

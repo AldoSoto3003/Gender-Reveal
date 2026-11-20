@@ -3,113 +3,132 @@
   position: absolute;
   inset: 0;
   overflow: hidden;
-  background: #f8f3eb;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
+  background:
+    radial-gradient(ellipse 60% 50% at 85% 20%, rgba(227, 178, 60, 0.16), transparent 70%),
+    radial-gradient(ellipse 50% 45% at 10% 90%, rgba(159, 181, 131, 0.2), transparent 70%),
+    var(--papel);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: minmax(0, 0.9fr) auto minmax(64px, 0.5fr);
+  padding-left: max(24px, env(safe-area-inset-left, 0px));
+  padding-right: max(24px, env(safe-area-inset-right, 0px));
 }
 
-.pt-papel {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  opacity: 0.85;
-  pointer-events: none;
+/* Celular: globos arriba, texto abajo */
+.pt-globos {
+  position: relative;
+  min-height: 0;
 }
 
 .pt-globo {
   position: absolute;
   overflow: visible;
   pointer-events: none;
+  height: auto;
 }
 
-/* Celular: dos globos grandes arriba y dos asomando por las orillas */
-.pt-g1 { width: 46vw; left: 46%; top: -3%; transform: rotate(6deg); }
-.pt-g2 { width: 50vw; left: 4%; top: 1%; transform: rotate(-5deg); }
-.pt-g3 { width: 26vw; right: -9vw; top: 46%; opacity: 0.55; transform: rotate(10deg); }
-.pt-g4 { width: 24vw; left: -8vw; top: 58%; opacity: 0.5; transform: rotate(-8deg); }
+.pt-g1 { width: min(38vw, 190px); left: 50%; margin-left: -42vw; top: 6%; animation: pt-flota 6s ease-in-out infinite; }
+.pt-g2 { width: min(34vw, 170px); left: 50%; margin-left: 4vw; top: 12%; animation: pt-flota 7s ease-in-out -2s infinite; }
+.pt-g3 { width: min(18vw, 90px); left: 50%; margin-left: -10vw; top: 40%; opacity: 0.85; animation: pt-flota 5.5s ease-in-out -1s infinite; }
+
+@keyframes pt-flota {
+  0%, 100% { transform: translateY(0) rotate(-2deg); }
+  50% { transform: translateY(-10px) rotate(2deg); }
+}
 
 .pt-texto {
   position: relative;
   z-index: 2;
-  margin-top: 38svh;
-  padding: 0 24px;
   color: var(--tinta);
 }
 
-.pt-pre,
-.pt-sub,
-.pt-fecha,
-.pt-lugar {
-  font-family: var(--mano);
-  text-transform: uppercase;
-  letter-spacing: 0.12em;
-  margin: 0;
-}
-
 .pt-pre {
-  font-size: 17px;
+  margin: 0;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--texto-suave);
 }
 
 .pt-titulo {
-  font-family: var(--mano);
-  font-weight: 400;
-  text-transform: uppercase;
-  letter-spacing: 0.03em;
-  font-size: clamp(54px, 15vw, 132px);
-  line-height: 0.95;
-  margin: 8px 0 10px;
+  font-family: var(--display);
+  font-weight: 800;
+  font-size: clamp(60px, 17vw, 136px);
+  line-height: 0.88;
+  letter-spacing: -0.045em;
+  margin: 12px 0 14px;
 }
 
-.pt-rosa { color: var(--tinta-rosa); }
-.pt-azul { color: var(--tinta-azul); }
-.pt-o { color: var(--tinta); font-size: 0.6em; }
+.pt-nina { color: var(--tinta-nina); }
+.pt-nino { color: var(--tinta-nino); }
+.pt-o {
+  font-weight: 400;
+  font-size: 0.5em;
+  color: var(--texto-tenue);
+  letter-spacing: 0;
+  vertical-align: 0.35em;
+  margin: 0 0.12em;
+}
 
 .pt-sub {
-  font-size: 19px;
+  margin: 0;
+  font-size: 17px;
+  color: var(--texto-suave);
+  max-width: 34ch;
 }
 
-.pt-fecha {
-  font-size: 17px;
+.pt-cuando {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 20px;
   margin-top: 18px;
+  font-weight: 600;
+  font-size: 16px;
 }
+
+.pt-cuando span {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.pt-cuando svg { color: var(--tinta-nino); flex: none; }
 
 .pt-lugar {
-  font-size: 16px;
+  margin: 6px 0 0;
+  font-size: 15px;
   color: var(--texto-suave);
-  margin-top: 4px;
 }
 
 .pt-cuenta {
   display: flex;
-  justify-content: center;
   gap: 22px;
-  margin-top: 22px;
+  margin-top: 24px;
 }
 
 .pt-cuenta > div {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  min-width: 48px;
+  min-width: 44px;
 }
 
 .pt-n {
-  font-family: var(--mano);
+  font-family: var(--display);
+  font-weight: 700;
   font-size: 34px;
   line-height: 1;
+  letter-spacing: -0.03em;
   font-variant-numeric: tabular-nums;
 }
 
 .pt-l {
-  font-size: 12px;
+  font-size: 11px;
+  font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.1em;
-  color: var(--texto-suave);
-  margin-top: 4px;
+  letter-spacing: 0.14em;
+  color: var(--texto-tenue);
+  margin-top: 6px;
 }
 
 .pt-desliza {
@@ -122,10 +141,10 @@
   flex-direction: column;
   align-items: center;
   gap: 2px;
-  font-family: var(--mano);
+  font-size: 12px;
+  font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.12em;
-  font-size: 15px;
+  letter-spacing: 0.18em;
   color: var(--texto-suave);
   text-decoration: none;
   white-space: nowrap;
@@ -140,18 +159,24 @@
   50% { transform: translateY(5px); }
 }
 
-/* Escritorio: globos a los lados, texto al centro */
+/* Escritorio: texto a la izquierda, globos a la derecha */
 @media (min-width: 761px) {
-  .pt-g1 { width: min(25vw, 340px); left: auto; right: 9vw; top: 6%; }
-  .pt-g2 { width: min(26vw, 360px); left: 8vw; top: 3%; }
-  .pt-g3 { width: min(12vw, 170px); right: 1vw; top: 52%; }
-  .pt-g4 { width: min(12vw, 170px); left: 1vw; top: 60%; }
-  .pt-texto { margin-top: 0; }
-  .pt-pre { font-size: 20px; }
-  .pt-sub { font-size: 24px; }
-  .pt-fecha { font-size: 20px; margin-top: 24px; }
-  .pt-lugar { font-size: 18px; }
-  .pt-cuenta { gap: 34px; margin-top: 30px; }
-  .pt-n { font-size: 46px; }
-  .pt-l { font-size: 13px; }
+  .pt {
+    grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+    grid-template-rows: minmax(0, 1fr);
+    align-items: center;
+    gap: 40px;
+    padding-left: max(8vw, env(safe-area-inset-left, 0px));
+    padding-right: max(6vw, env(safe-area-inset-right, 0px));
+  }
+  .pt-globos { order: 2; height: 78%; align-self: center; }
+  .pt-g1 { width: min(17vw, 250px); left: 4%; margin-left: 0; top: 0; }
+  .pt-g2 { width: min(15vw, 220px); left: auto; right: 4%; margin-left: 0; top: 10%; }
+  .pt-g3 { width: min(8vw, 120px); left: 40%; margin-left: 0; top: 44%; }
+  .pt-pre { font-size: 13px; }
+  .pt-sub { font-size: 20px; }
+  .pt-cuando { font-size: 18px; margin-top: 24px; }
+  .pt-cuenta { gap: 34px; margin-top: 34px; }
+  .pt-n { font-size: 48px; }
+  .pt-l { font-size: 12px; }
 }

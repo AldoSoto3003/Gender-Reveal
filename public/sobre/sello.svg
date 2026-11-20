@@ -5,7 +5,7 @@
 <feGaussianBlur in="h0" stdDeviation="1.6" result="h"/>
 <feDiffuseLighting in="h" surfaceScale="7" diffuseConstant="1.05" lighting-color="#fff" result="dif"><feDistantLight azimuth="225" elevation="48"/></feDiffuseLighting>
 <feSpecularLighting in="h" surfaceScale="7" specularConstant="1" specularExponent="24" lighting-color="#fff4ea" result="spec"><feDistantLight azimuth="225" elevation="52"/></feSpecularLighting>
-<feFlood flood-color="#A9512B" result="col"/>
+<feFlood flood-color="#B98A1F" result="col"/>
 <feComposite in="col" in2="dif" operator="arithmetic" k1="1.2" result="lit"/>
 <feComposite in="lit" in2="SourceAlpha" operator="in" result="litM"/>
 <feComposite in="spec" in2="SourceAlpha" operator="in" result="specM"/>

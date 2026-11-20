@@ -1,4 +1,4 @@
-import { hora, palabra, titulo } from '../../lib/formato';
+import { diaMes, hora, palabra, titulo } from '../../lib/formato';
 import type { Evento, MiPrediccion, Prediccion } from '../../lib/types';
 
 interface Props {
@@ -16,8 +16,9 @@ export function Revelacion({ evento, predicciones, mia }: Props) {
       <div className="wrap">
         {!r ? (
           <>
+            <span className="tag">El gran momento</span>
             <h2 className="h2" id="h-rv">
-              El 16 de enero abrimos el sobre
+              El {diaMes(evento.fecha_hora)} abrimos el sobre
             </h2>
             <p className="sub">
               A las {hora(evento.fecha_hora)} lo abriremos frente a todos, y en ese mismo momento esta página mostrará el resultado en
@@ -26,10 +27,11 @@ export function Revelacion({ evento, predicciones, mia }: Props) {
           </>
         ) : (
           <div role="status">
-            <h2 className="h2" id="h-rv">
+            <span className="tag">El resultado</span>
+            <h2 className="sr-only" id="h-rv">
               El resultado
             </h2>
-            <p className={`rv-t ${r === 'nina' ? 'pct-g' : 'pct-b'}`}>{titulo(r)}</p>
+            <p className={`rv-t ${r === 'nina' ? 'pct-nina' : 'pct-nino'}`}>{titulo(r)}</p>
             <p className="rv-h">
               {aciertos.length} de {predicciones.length} acertaron
             </p>

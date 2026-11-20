@@ -18,8 +18,8 @@ const TABS: { id: Tab; label: string; icon: string }[] = [
 function Globito() {
   return (
     <svg width="36" height="46" viewBox="0 0 60 78" aria-hidden="true">
-      <path d="M30 2C47 2 57 17 57 34C57 53 43 66 30 68C17 66 3 53 3 34C3 17 13 2 30 2Z" fill="#F2A9A0" />
-      <path d="M26 74L34 74L30 67Z" fill="#F2A9A0" />
+      <path d="M30 2C47 2 57 17 57 34C57 53 43 66 30 68C17 66 3 53 3 34C3 17 13 2 30 2Z" fill="#E3B23C" />
+      <path d="M26 74L34 74L30 67Z" fill="#E3B23C" />
       <ellipse cx="19" cy="22" rx="5" ry="9" fill="#FFFFFF" opacity="0.6" transform="rotate(-25 19 22)" />
     </svg>
   );

@@ -27,11 +27,11 @@ export function TarjetaEstatica() {
         </figure>
       )}
       <style>{`
-        body { background: #E6DFD5; }
+        body { background: var(--mesa); }
         .tarjeta-sola { min-height: 100vh; display: grid; place-items: center; padding: 24px; }
         .tarjeta-sola figure { margin: 0; width: min(560px, 100%); }
         .tarjeta-svg { width: 100%; display: block; box-shadow: 0 1px 2px rgba(40,30,20,.2), 0 30px 60px -20px rgba(50,36,22,.45); }
-        .tarjeta-sola figcaption { margin-top: 18px; text-align: center; font-family: var(--mano); letter-spacing: .05em; color: var(--tinta); font-size: 18px; }
+        .tarjeta-sola figcaption { margin-top: 18px; text-align: center; font-family: var(--sans); font-weight: 500; color: var(--tinta); font-size: 18px; }
         @media print { body { background: #fff; } .tarjeta-svg { box-shadow: none; } .tarjeta-sola { padding: 0; } }
       `}</style>
     </div>

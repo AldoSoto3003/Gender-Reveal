@@ -1,19 +1,25 @@
 :root {
-  --mesa: #e6dfd5;
-  --papel: #f7f4ef;
-  --papel-tarjeta: #fdfcfa;
-  --tinta: #4e5a6e;
-  --tinta-fuerte: #3b4558;
-  --texto: #3f3a35;
-  --texto-suave: #6b6660;
-  --texto-tenue: #7a746d;
-  --globo-rosa: #f2a9a0;
-  --globo-azul: #9db6db;
-  --tinta-rosa: #c0504a;
-  --tinta-azul: #34507a;
+  /* Paleta neutra: avena, olivo, miel (niña) y salvia (niño). Sin azules ni rosas. */
+  --mesa: #e8e6d2;
+  --papel: #f2f0e3;
+  --papel-tarjeta: #f8f7ee;
+  --campo: rgba(44, 54, 36, 0.06);
+  --linea: rgba(44, 54, 36, 0.14);
+  --tinta: #2c3624;
+  --tinta-fuerte: #1d2418;
+  --texto: #2c3624;
+  --texto-suave: #59624d;
+  --texto-tenue: #6f7765;
+  --globo-nina: #e3b23c;
+  --globo-nino: #9fb583;
+  --claro-nina: #f3d98d;
+  --claro-nino: #cfdcbc;
+  --tinta-nina: #845f06;
+  --tinta-nino: #46652e;
   --oro: #c9a24e;
-  --error: #a2392f;
-  --mano: 'Patrick Hand', 'Comic Sans MS', cursive;
+  --error: #9b3a1c;
+  --mano: 'Bricolage Grotesque', 'Avenir Next', 'Segoe UI', system-ui, sans-serif;
+  --display: var(--mano);
   --sans: 'Figtree', system-ui, -apple-system, 'Segoe UI', sans-serif;
 }
 
@@ -52,13 +58,14 @@ a:hover {
 
 :focus-visible {
   outline: 2px solid var(--tinta);
-  outline-offset: 4px;
+  outline-offset: 3px;
+  border-radius: 8px;
 }
 
 .hand {
   font-family: var(--mano);
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
+  font-weight: 700;
+  letter-spacing: -0.01em;
 }
 
 .sr-only {
@@ -75,13 +82,13 @@ a:hover {
   border: 0;
   border-radius: 999px;
   background: var(--tinta);
-  color: #fbf8f3;
-  font-family: var(--mano);
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  font-size: 23px;
-  padding: 13px 36px;
-  min-height: 58px;
+  color: #f6f4e8;
+  font-family: var(--sans);
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  font-size: 16px;
+  padding: 12px 28px;
+  min-height: 54px;
   cursor: pointer;
   text-decoration: none;
   display: inline-flex;
@@ -93,7 +100,7 @@ a:hover {
 
 .btn:hover {
   background: var(--tinta-fuerte);
-  color: #fbf8f3;
+  color: #f6f4e8;
   transform: translateY(-2px);
 }
 
@@ -107,12 +114,12 @@ a:hover {
 .btn-o {
   background: transparent;
   color: var(--tinta);
-  box-shadow: inset 0 0 0 2px var(--tinta);
+  box-shadow: inset 0 0 0 1.5px var(--tinta);
 }
 
 .btn-o:hover {
-  background: var(--tinta);
-  color: #fbf8f3;
+  background: var(--campo);
+  color: var(--tinta);
 }
 
 .lnk {

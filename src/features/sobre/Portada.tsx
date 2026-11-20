@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { fechaLarga, hora } from '../../lib/formato';
 import type { Evento } from '../../lib/types';
-import { AZUL, ROSA } from '../../ui/SvgDefs';
+import { NINA, NINO } from '../../ui/SvgDefs';
 
 function useCuenta(iso: string) {
   const [ahora, setAhora] = useState(() => Date.now());
@@ -35,6 +35,19 @@ function Globo({ color, className }: { color: string; className: string }) {
   );
 }
 
+const Calendario = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
+    <rect x="3" y="5" width="18" height="16" rx="3" />
+    <path d="M3 10h18M8 3v4M16 3v4" />
+  </svg>
+);
+const Reloj = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
+    <circle cx="12" cy="12" r="9" />
+    <path d="M12 7v5l3 2" />
+  </svg>
+);
+
 /** La invitación a pantalla completa: es lo que hay "dentro" del sobre. */
 export function Portada({ evento }: { evento: Evento }) {
   const cuenta = useCuenta(evento.fecha_hora);
@@ -42,24 +55,30 @@ export function Portada({ evento }: { evento: Evento }) {
 
   return (
     <section className="pt" aria-label="Invitación">
-      <svg className="pt-papel" aria-hidden="true">
-        <rect width="100%" height="100%" filter="url(#paperLit)" />
-      </svg>
-
-      <Globo color={AZUL} className="pt-g1" />
-      <Globo color={ROSA} className="pt-g2" />
-      <Globo color={ROSA} className="pt-g3" />
-      <Globo color={AZUL} className="pt-g4" />
+      <div className="pt-globos" aria-hidden="true">
+        <Globo color={NINA} className="pt-g1" />
+        <Globo color={NINO} className="pt-g2" />
+        <Globo color="#F3D98D" className="pt-g3" />
+      </div>
 
       <div className="pt-texto">
-        <p className="pt-pre">Acompáñanos a la</p>
+        <p className="pt-pre">Acompáñanos a la revelación{papas ? ` de ${papas}` : ''}</p>
         <h1 className="pt-titulo">
-          <span className="pt-rosa">¿Niña</span> <span className="pt-o">o</span> <span className="pt-azul">niño?</span>
+          <span className="pt-nina">¿Niña</span>
+          <span className="pt-o">o</span>
+          <span className="pt-nino">niño?</span>
         </h1>
-        <p className="pt-sub">Revelación de género{papas ? ` de ${papas}` : ''}</p>
-        <p className="pt-fecha">
-          {fechaLarga(evento.fecha_hora)}, {hora(evento.fecha_hora)}
-        </p>
+        <p className="pt-sub">Nadie lo sabe todavía, ni siquiera nosotros. Lo descubriremos juntos.</p>
+        <div className="pt-cuando">
+          <span>
+            <Calendario />
+            {fechaLarga(evento.fecha_hora)}
+          </span>
+          <span>
+            <Reloj />
+            {hora(evento.fecha_hora)}
+          </span>
+        </div>
         {evento.lugar && <p className="pt-lugar">{evento.lugar}</p>}
         <div className="pt-cuenta" role="timer" aria-label="Tiempo que falta">
           {cuenta.map((c) => (
@@ -71,7 +90,7 @@ export function Portada({ evento }: { evento: Evento }) {
         </div>
       </div>
 
-      <a className="pt-desliza" href="#votar">
+      <a className="pt-desliza" href="#contenido">
         Desliza para ver más
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
           <path d="M6 9l6 6 6-6" />

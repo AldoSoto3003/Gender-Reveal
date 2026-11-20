@@ -1,7 +1,7 @@
 import { titulo } from '../../lib/formato';
 import type { Sexo } from '../../lib/types';
 import { Globo } from '../../ui/Globo';
-import { AZUL, ROSA } from '../../ui/SvgDefs';
+import { NINA, NINO } from '../../ui/SvgDefs';
 
 const GLOBOS = Array.from({ length: 16 }, (_, i) => ({
   l: 3 + ((i * 59) % 92),
@@ -19,8 +19,8 @@ const BRILLO = Array.from({ length: 46 }, (_, i) => ({
 
 /** Globos que suben y brillo dorado que cae. Se usa en la invitación y en el ensayo del panel. */
 export function Lluvia({ sexo }: { sexo: Sexo }) {
-  const color = sexo === 'nina' ? ROSA : AZUL;
-  const claro = sexo === 'nina' ? '#F7CFC9' : '#C9D7EC';
+  const color = sexo === 'nina' ? NINA : NINO;
+  const claro = sexo === 'nina' ? '#F3D98D' : '#CFDCBC';
   return (
     <>
       <div className="glit" aria-hidden="true">
@@ -49,7 +49,7 @@ export function Celebracion({ sexo, onCerrar }: { sexo: Sexo; onCerrar: () => vo
     <div className="celebra" role="dialog" aria-modal="true" aria-label={titulo(sexo)}>
       <Lluvia sexo={sexo} />
       <div className="celebra-in">
-        <p className={`rv-t ${sexo === 'nina' ? 'pct-g' : 'pct-b'}`}>{titulo(sexo)}</p>
+        <p className={`rv-t ${sexo === 'nina' ? 'pct-nina' : 'pct-nino'}`}>{titulo(sexo)}</p>
         <button type="button" className="btn btn-o celebra-btn" onClick={onCerrar}>
           Ver quién acertó
         </button>

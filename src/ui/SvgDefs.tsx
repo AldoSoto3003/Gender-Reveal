@@ -98,7 +98,7 @@ export function SvgDefs() {
         <symbol id="bal" viewBox="0 0 200 260">
           <g filter="url(#wc)">
             <path d={CUERPO} fill="currentColor" opacity={0.8} />
-            <path d={CUERPO} fill="#1E2A3A" opacity={0.1} transform="translate(30 36) scale(0.78)" />
+            <path d={CUERPO} fill="#2C3624" opacity={0.1} transform="translate(30 36) scale(0.78)" />
             <ellipse cx={80} cy={82} rx={50} ry={56} fill="#FFFFFF" opacity={0.2} />
             <path d="M93 205L107 205L105 216L95 216Z" fill="currentColor" opacity={0.9} />
           </g>
@@ -117,10 +117,10 @@ export function SvgDefs() {
           <path d="M88 30C92 36 95 44 94 52" fill="none" stroke="#FFF2C4" strokeOpacity={0.35} strokeWidth={2} strokeLinecap="round" />
           <circle cx={50} cy={50} r={30} fill="none" stroke="#6E4F16" strokeOpacity={0.55} strokeWidth={2.2} />
           <circle cx={50} cy={49} r={30} fill="none" stroke="#FFF2C4" strokeOpacity={0.4} strokeWidth={1} />
-          <text x={50} y={62.5} textAnchor="middle" fontFamily="Patrick Hand, Comic Sans MS, cursive" fontSize={36} fill="#FFF2C4" fillOpacity={0.45}>
+          <text x={50} y={62.5} textAnchor="middle" fontFamily="Bricolage Grotesque, Avenir Next, Segoe UI, sans-serif" fontWeight={800} fontSize={34} fill="#FFF2C4" fillOpacity={0.45}>
             ?
           </text>
-          <text x={50} y={63.6} textAnchor="middle" fontFamily="Patrick Hand, Comic Sans MS, cursive" fontSize={36} fill="#6E4F16" fillOpacity={0.85}>
+          <text x={50} y={63.6} textAnchor="middle" fontFamily="Bricolage Grotesque, Avenir Next, Segoe UI, sans-serif" fontWeight={800} fontSize={34} fill="#6E4F16" fillOpacity={0.85}>
             ?
           </text>
           <ellipse cx={34} cy={25} rx={14} ry={6} fill="#FFFBEA" fillOpacity={0.45} transform="rotate(-30 34 25)" />
@@ -130,5 +130,10 @@ export function SvgDefs() {
   );
 }
 
-export const ROSA = '#F2A9A0';
-export const AZUL = '#9DB6DB';
+/** Globo de niña: amarillo miel. */
+export const NINA = '#E3B23C';
+/** Globo de niño: verde salvia. */
+export const NINO = '#9FB583';
+/** Texto legible sobre el papel para cada lado. */
+export const TINTA_NINA = '#845F06';
+export const TINTA_NINO = '#46652E';

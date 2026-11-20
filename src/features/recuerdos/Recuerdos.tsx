@@ -1,4 +1,5 @@
-import { useRef, useState, type ChangeEvent } from 'react';
+import { useEffect, useRef, useState, type ChangeEvent } from 'react';
+import { diaMes } from '../../lib/formato';
 import { api, mensajeError } from '../../lib/api';
 import { reducirFoto } from '../../lib/imagen';
 import type { Evento, FotoRecuerdo } from '../../lib/types';
@@ -12,6 +13,13 @@ interface Props {
 export function Recuerdos({ evento, fotos, nombreSugerido }: Props) {
   const input = useRef<HTMLInputElement>(null);
   const [nombre, setNombre] = useState(nombreSugerido ?? '');
+  const [nombreTocado, setNombreTocado] = useState(false);
+  const dia = diaMes(evento.fecha_hora);
+
+  // La predicción puede llegar o cambiar después de montar la sección.
+  useEffect(() => {
+    if (!nombreTocado && nombreSugerido) setNombre(nombreSugerido);
+  }, [nombreSugerido, nombreTocado]);
   const [subiendo, setSubiendo] = useState<string | null>(null);
   const [aviso, setAviso] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -42,33 +50,39 @@ export function Recuerdos({ evento, fotos, nombreSugerido }: Props) {
   return (
     <section className="sec" id="recuerdos" aria-labelledby="h-mem">
       <div className="wrap">
-        <h2 className="h2" id="h-mem">
-          Recuerdos del 16 de enero
-        </h2>
+        <div className="sec-cab">
+          <div>
+            <span className="tag">{evento.galeria_visible ? 'Galería' : 'Después de la fiesta'}</span>
+            <h2 className="h2" id="h-mem">
+              Recuerdos del {dia}
+            </h2>
+          </div>
+          <p>
+            {evento.galeria_visible
+              ? 'Fotos de la familia y de los invitados. Sube las tuyas para que todos las vean.'
+              : 'Aquí estarán todas las fotos de la fiesta. Tú también podrás subir las que tomes.'}
+          </p>
+        </div>
 
         {!evento.galeria_visible ? (
           <>
-            <p className="sub">Después de la fiesta, aquí estarán todas las fotos del día. Tú también podrás subir las que tomes.</p>
-            <div className="mem-lock" aria-hidden="true">
-              <div className="pb pb1" />
-              <div className="pb pb2" />
-              <div className="pb pb3">
-                <div className="pb-in">
-                  <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#7A746D" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
-                    <rect x="5" y="11" width="14" height="10" rx="2" />
-                    <path d="M8 11V8a4 4 0 0 1 8 0v3" />
-                  </svg>
-                </div>
-                <p className="pb-cap hand">Se abre el 16 de enero</p>
+            <div className="mem-lock">
+              <div aria-hidden="true" />
+              <div>
+                <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <rect x="5" y="11" width="14" height="10" rx="2" />
+                  <path d="M8 11V8a4 4 0 0 1 8 0v3" />
+                </svg>
+                <p>Se abre el {dia}</p>
               </div>
+              <div aria-hidden="true" />
             </div>
           </>
         ) : (
           <>
-            <p className="sub">Fotos de la familia y de los invitados. Sube las tuyas para que todos las vean.</p>
             {evento.invitados_suben_fotos && (
               <div className="upload">
-                <div className="upload-name">
+                <div className="campo">
                   <label className="lbl" htmlFor="mn">
                     Tu nombre
                   </label>
@@ -79,11 +93,14 @@ export function Recuerdos({ evento, fotos, nombreSugerido }: Props) {
                     maxLength={60}
                     placeholder="Para saber quién la tomó"
                     value={nombre}
-                    onChange={(e) => setNombre(e.target.value)}
+                    onChange={(e) => {
+                      setNombreTocado(true);
+                      setNombre(e.target.value);
+                    }}
                   />
                 </div>
                 <input ref={input} type="file" accept="image/*" multiple hidden onChange={elegir} />
-                <div className="center">
+                <div className="fila-envio">
                   <button type="button" className="btn" disabled={!!subiendo} onClick={() => input.current?.click()}>
                     {subiendo ?? 'Subir mis fotos'}
                   </button>
@@ -101,7 +118,7 @@ export function Recuerdos({ evento, fotos, nombreSugerido }: Props) {
               </div>
             )}
             {fotos.length === 0 ? (
-              <p className="demo">Todavía no hay fotos publicadas.</p>
+              <p className="vacio">Todavía no hay fotos publicadas.</p>
             ) : (
               <div className="mem-grid">
                 {fotos.map((f) => (

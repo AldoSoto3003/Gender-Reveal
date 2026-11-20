@@ -88,9 +88,9 @@ export function EscenaSobre({ evento, onAbierto, reinicio }: Props) {
         <div className="sb-bolsillo" onClick={abrir}>
           <Papel id="papelBolsillo" />
           <svg className="sb-pliegues" viewBox="0 0 100 100" preserveAspectRatio="none">
-            <path d="M0 100L50 55L100 100" fill="none" stroke="#7A5E3A" strokeOpacity=".16" strokeWidth="1" vectorEffect="non-scaling-stroke" />
+            <path d="M0 100L50 55L100 100" fill="none" stroke="#2C3624" strokeOpacity=".14" strokeWidth="1" vectorEffect="non-scaling-stroke" />
             <path d="M0 100L50 55L100 100Z" fill="#FFFFFF" fillOpacity=".12" />
-            <path d="M100 0L50 58L100 100Z" fill="#5E4628" fillOpacity=".04" />
+            <path d="M100 0L50 58L100 100Z" fill="#2C3624" fillOpacity=".05" />
           </svg>
           <img className="sb-ilus sb-ilus-i" src="/sobre/globos.svg" alt="" />
           <img className="sb-ilus sb-ilus-d" src="/sobre/zapatitos.svg" alt="" />

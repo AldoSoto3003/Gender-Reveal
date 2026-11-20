@@ -51,3 +51,16 @@ export function aIso(fecha: string, horaTxt: string): string {
 
 export const palabra = (s: Sexo) => (s === 'nina' ? 'niña' : 'niño');
 export const titulo = (s: Sexo) => (s === 'nina' ? '¡Es niña!' : '¡Es niño!');
+
+/** "16 de enero" */
+export function diaMes(iso: string): string {
+  return new Intl.DateTimeFormat('es-MX', { day: 'numeric', month: 'long', timeZone: ZONA }).format(new Date(iso));
+}
+
+/** Partes sueltas de la fecha para composiciones grandes: { dia: '16', mes: 'Enero', semana: 'Sábado', anio: '2027' } */
+export function partesFecha(iso: string): { dia: string; mes: string; semana: string; anio: string } {
+  const f = new Date(iso);
+  const p = (o: Intl.DateTimeFormatOptions) => new Intl.DateTimeFormat('es-MX', { timeZone: ZONA, ...o }).format(f);
+  const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
+  return { dia: p({ day: 'numeric' }), mes: cap(p({ month: 'long' })), semana: cap(p({ weekday: 'long' })), anio: p({ year: 'numeric' }) };
+}

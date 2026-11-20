@@ -12,7 +12,7 @@ interface Props {
 }
 
 /** Globo de acuarela con brillos dorados (usa el símbolo #bal de SvgDefs). */
-export function Globo({ color, texto, colorTexto = '#4E5A6E', hilos = true, className }: Props) {
+export function Globo({ color, texto, colorTexto = '#2C3624', hilos = true, className }: Props) {
   return (
     <svg className={className} viewBox={hilos ? '0 0 200 380' : '0 0 200 260'} aria-hidden="true" style={{ overflow: 'visible' }}>
       {hilos && (
@@ -27,9 +27,10 @@ export function Globo({ color, texto, colorTexto = '#4E5A6E', hilos = true, clas
           x={100}
           y={120}
           textAnchor="middle"
-          fontFamily="Patrick Hand, Comic Sans MS, cursive"
-          fontSize={46}
-          letterSpacing={3}
+          fontFamily="Bricolage Grotesque, Avenir Next, Segoe UI, sans-serif"
+          fontWeight={800}
+          fontSize={40}
+          letterSpacing={1}
           fill={colorTexto}
         >
           {texto}

@@ -1,15 +1,50 @@
 import { useEffect, useState, type FormEvent } from 'react';
 import { api, mensajeError } from '../../lib/api';
-import { fechaLarga, hora } from '../../lib/formato';
+import { fechaLarga, hora, partesFecha } from '../../lib/formato';
 import { appleMaps, googleMaps } from '../../lib/mapas';
 import type { Evento, MiAsistencia, Respuesta } from '../../lib/types';
 
-function Pin() {
-  return (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+const ICONOS = {
+  cal: (
+    <>
+      <rect x="3" y="5" width="18" height="16" rx="3" />
+      <path d="M3 10h18M8 3v4M16 3v4" />
+    </>
+  ),
+  reloj: (
+    <>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M12 7v5l3 2" />
+    </>
+  ),
+  pin: (
+    <>
       <path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z" />
       <circle cx="12" cy="9.5" r="2.5" />
+    </>
+  ),
+  nota: <path d="M5 4h14v16H5zM9 9h6M9 13h6M9 17h3" />,
+};
+
+function Icono({ n }: { n: keyof typeof ICONOS }) {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      {ICONOS[n]}
     </svg>
+  );
+}
+
+function Dato({ icono, k, v, pendiente }: { icono: keyof typeof ICONOS; k: string; v: string; pendiente?: boolean }) {
+  return (
+    <li>
+      <span className="dato-ico">
+        <Icono n={icono} />
+      </span>
+      <div>
+        <p className="dato-k">{k}</p>
+        <p className={`dato-v${pendiente ? ' pend' : ''}`}>{v}</p>
+      </div>
+    </li>
   );
 }
 
@@ -23,19 +58,19 @@ const plural = (n: number, uno: string, varios: string) => `${n} ${n === 1 ? uno
 
 function Contador({ etiqueta, ayuda, valor, onCambio }: { etiqueta: string; ayuda: string; valor: number; onCambio: (n: number) => void }) {
   return (
-    <div className="ppl">
+    <div className="contador">
       <div>
         <span className="contador-t">{etiqueta}</span>
         <span className="contador-a">{ayuda}</span>
       </div>
-      <div className="step">
-        <button type="button" className="sb" aria-label={`${etiqueta}: uno menos`} disabled={valor <= 0} onClick={() => onCambio(Math.max(0, valor - 1))}>
+      <div className="paso">
+        <button type="button" aria-label={`${etiqueta}: uno menos`} disabled={valor <= 0} onClick={() => onCambio(Math.max(0, valor - 1))}>
           −
         </button>
-        <span className="cnt" aria-live="polite" aria-label={`${etiqueta}: ${valor}`}>
+        <span className="paso-n" aria-live="polite" aria-label={`${etiqueta}: ${valor}`}>
           {valor}
         </span>
-        <button type="button" className="sb" aria-label={`${etiqueta}: uno más`} disabled={valor >= 10} onClick={() => onCambio(Math.min(10, valor + 1))}>
+        <button type="button" aria-label={`${etiqueta}: uno más`} disabled={valor >= 10} onClick={() => onCambio(Math.min(10, valor + 1))}>
           +
         </button>
       </div>
@@ -64,6 +99,8 @@ export function Detalles({ evento, nombreSugerido }: { evento: Evento; nombreSug
   const [cargada, setCargada] = useState(false);
   const [editando, setEditando] = useState(false);
   const [nombre, setNombre] = useState('');
+  // Si la persona ya escribió (o borró) su nombre aquí, no se lo volvemos a sugerir.
+  const [nombreTocado, setNombreTocado] = useState(false);
   const [respuesta, setRespuesta] = useState<Respuesta | null>(null);
   const [adultos, setAdultos] = useState(0);
   const [ninos, setNinos] = useState(0);
@@ -81,11 +118,12 @@ export function Detalles({ evento, nombreSugerido }: { evento: Evento; nombreSug
   }, []);
 
   useEffect(() => {
-    if (!nombre && nombreSugerido) setNombre(nombreSugerido);
-  }, [nombreSugerido, nombre]);
+    if (!nombreTocado && nombreSugerido) setNombre(nombreSugerido);
+  }, [nombreSugerido, nombreTocado]);
 
   function empezarEdicion() {
     if (mia) {
+      setNombreTocado(true);
       setNombre(mia.nombre);
       setRespuesta(mia.respuesta);
       setAdultos(mia.adultos);
@@ -123,94 +161,108 @@ export function Detalles({ evento, nombreSugerido }: { evento: Evento; nombreSug
   }
 
   const mostrarForm = cargada && (!mia || editando);
+  const f = partesFecha(evento.fecha_hora);
   const pista = !nombre.trim() ? 'Escribe tu nombre.' : !respuesta ? 'Dinos si vienes.' : '';
 
   return (
     <section className="sec" id="detalles" aria-labelledby="h-det">
       <div className="wrap">
-        <h2 className="h2" id="h-det">
-          Los detalles
-        </h2>
-        <div className="dcard">
-          <svg className="paper" aria-hidden="true">
-            <rect width="100%" height="100%" filter="url(#paperLit)" />
-          </svg>
-          <div className="drow">
-            <span className="dk">Cuándo</span>
-            <span className="dv">{fechaLarga(evento.fecha_hora)}</span>
+        <div className="sec-cab">
+          <div>
+            <span className="tag">Apunta la fecha</span>
+            <h2 className="h2" id="h-det">
+              Los detalles
+            </h2>
           </div>
-          <div className="drow">
-            <span className="dk">Hora</span>
-            <span className="dv">{hora(evento.fecha_hora)}</span>
+          <p>Todo lo que necesitas para llegar. Si algo cambia, lo verás aquí primero.</p>
+        </div>
+
+        <div className="detalles">
+          <div className="fecha-grande" aria-hidden="true">
+            <span className="fg-dia">{f.dia}</span>
+            <span className="fg-mes">{f.mes}</span>
+            <span className="fg-resto">
+              {f.semana} · {f.anio}
+            </span>
           </div>
-          <div className="drow">
-            <span className="dk">Dónde</span>
-            <span className="dv">{evento.lugar || 'Por confirmar'}</span>
+          <div>
+            <ul className="datos">
+              <Dato icono="cal" k="Cuándo" v={fechaLarga(evento.fecha_hora)} />
+              <Dato icono="reloj" k="Hora" v={`${hora(evento.fecha_hora)} (hora del centro de México)`} />
+              <Dato icono="pin" k="Dónde" v={evento.lugar || 'Lugar por confirmar'} pendiente={!evento.lugar} />
+              {evento.direccion && <Dato icono="pin" k="Dirección" v={evento.direccion} />}
+              {evento.nota && <Dato icono="nota" k="Nota" v={evento.nota} />}
+            </ul>
+            {evento.direccion ? (
+              <div className="mapas">
+                <a className="btn btn-o" href={googleMaps(evento.direccion)} target="_blank" rel="noopener noreferrer">
+                  <Icono n="pin" />
+                  Google Maps
+                </a>
+                <a className="btn btn-o" href={appleMaps(evento.direccion)} target="_blank" rel="noopener noreferrer">
+                  <Icono n="pin" />
+                  Apple Maps
+                </a>
+              </div>
+            ) : (
+              <p className="nota-mapa">Los botones para abrir el mapa aparecerán aquí en cuanto confirmemos el lugar.</p>
+            )}
           </div>
-          {evento.direccion && (
-            <div className="drow">
-              <span className="dk">Dirección</span>
-              <span className="dv">{evento.direccion}</span>
-            </div>
-          )}
-          {evento.nota && (
-            <div className="drow">
-              <span className="dk">Nota</span>
-              <span className="dv">{evento.nota}</span>
-            </div>
-          )}
+        </div>
 
-          {evento.direccion && (
-            <div className="maps">
-              <a className="btn btn-o" href={googleMaps(evento.direccion)} target="_blank" rel="noopener noreferrer">
-                <Pin />
-                Abrir en Google Maps
-              </a>
-              <a className="btn btn-o" href={appleMaps(evento.direccion)} target="_blank" rel="noopener noreferrer">
-                <Pin />
-                Abrir en Apple Maps
-              </a>
-            </div>
-          )}
+        <div className="rsvp" id="confirmar">
+          <div className="rsvp-intro">
+            <span className="tag">Confirmación</span>
+            <h3>Confirma tu asistencia</h3>
+            <p>Nos ayuda a preparar lugar y comida para todos. Puedes cambiar tu respuesta cuando quieras.</p>
+            {evento.telefono && (
+              <p className="rnote">
+                ¿Prefieres confirmar por teléfono? Llama o escribe al{' '}
+                <a href={`tel:${evento.telefono.replace(/[^\d+]/g, '')}`}>{evento.telefono}</a>.
+              </p>
+            )}
+          </div>
 
-          <div className="rsvp" id="confirmar">
-            <p className="dk rsvp-h">Confirma tu asistencia</p>
-
+          <div>
             {mostrarForm && (
-              <form onSubmit={enviar}>
-                <label className="lbl" htmlFor="rn">
-                  Tu nombre
-                </label>
-                <input
-                  className="in"
-                  id="rn"
-                  type="text"
-                  autoComplete="name"
-                  maxLength={60}
-                  placeholder="Nombre y apellido"
-                  value={nombre}
-                  onChange={(e) => setNombre(e.target.value)}
-                />
-                <div className="seg-row" role="group" aria-label="¿Vienes a la fiesta?">
-                  {OPCIONES.map((o) => (
-                    <button
-                      key={o.valor}
-                      type="button"
-                      className={`seg${respuesta === o.valor ? ' on' : ''}`}
-                      aria-pressed={respuesta === o.valor}
-                      onClick={() => setRespuesta(o.valor)}
-                    >
-                      {o.texto}
-                    </button>
-                  ))}
+              <form className="form" onSubmit={enviar} noValidate>
+                <div className="campo">
+                  <label className="lbl" htmlFor="rn">
+                    Tu nombre
+                  </label>
+                  <input
+                    className="in"
+                    id="rn"
+                    type="text"
+                    autoComplete="name"
+                    maxLength={60}
+                    placeholder="Nombre y apellido"
+                    value={nombre}
+                    onChange={(e) => {
+                      setNombreTocado(true);
+                      setNombre(e.target.value);
+                    }}
+                  />
+                </div>
+                <div className="campo">
+                  <span className="lbl" id="lbl-vienes">
+                    ¿Vienes a la fiesta?
+                  </span>
+                  <div className="seg" role="group" aria-labelledby="lbl-vienes">
+                    {OPCIONES.map((o) => (
+                      <button key={o.valor} type="button" aria-pressed={respuesta === o.valor} onClick={() => setRespuesta(o.valor)}>
+                        {o.texto}
+                      </button>
+                    ))}
+                  </div>
                 </div>
                 {respuesta && respuesta !== 'no' && (
                   <fieldset className="acomp">
-                    <legend className="dk acomp-h">{respuesta === 'si' ? '¿Quién viene contigo?' : '¿Quién vendría contigo?'}</legend>
+                    <legend className="lbl">{respuesta === 'si' ? '¿Quién viene contigo?' : '¿Quién vendría contigo?'}</legend>
                     <Contador etiqueta="Adultos" ayuda="Además de ti, por ejemplo tu pareja" valor={adultos} onCambio={setAdultos} />
                     <Contador etiqueta="Niños" ayuda="Bebés y niños de cualquier edad" valor={ninos} onCambio={setNinos} />
                     {adultos + ninos > 0 && (
-                      <div className="acomp-nombres">
+                      <div className="campo acomp-nombres">
                         <label className="lbl" htmlFor="ra">
                           Sus nombres (opcional)
                         </label>
@@ -230,7 +282,7 @@ export function Detalles({ evento, nombreSugerido }: { evento: Evento; nombreSug
                     </p>
                   </fieldset>
                 )}
-                <div className="rsvp-msg">
+                <div className="campo">
                   <label className="lbl" htmlFor="rm">
                     Mensaje para los papás (opcional)
                   </label>
@@ -244,38 +296,39 @@ export function Detalles({ evento, nombreSugerido }: { evento: Evento; nombreSug
                     onChange={(e) => setMensaje(e.target.value)}
                   />
                 </div>
-                <div className="center">
+                <div className="fila-envio">
                   <button type="submit" className="btn" disabled={!nombre.trim() || !respuesta || enviando}>
                     {enviando ? 'Enviando…' : 'Enviar confirmación'}
                   </button>
-                  {error ? (
-                    <p className="err" role="alert">
-                      {error}
-                    </p>
-                  ) : (
-                    <p className="hint2">{pista}</p>
+                  {mia && (
+                    <button type="button" className="lnk" onClick={() => setEditando(false)}>
+                      Dejarla como estaba
+                    </button>
                   )}
                 </div>
+                {error ? (
+                  <p className="err" role="alert">
+                    {error}
+                  </p>
+                ) : (
+                  <p className="pista">{pista}</p>
+                )}
               </form>
             )}
 
             {cargada && mia && !editando && (
-              <div className="okay" role="status">
-                <svg width="40" height="40" viewBox="0 0 34 34" fill="none" stroke="#4E5A6E" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                  <circle cx="17" cy="17" r="15" strokeOpacity="0.3" />
-                  <path d="M10 17.5l4.6 4.6L24.5 12" />
-                </svg>
-                <span>{mensajeListo(mia)}</span>
-                <button type="button" className="lnk" onClick={empezarEdicion}>
+              <div className="listo" role="status">
+                <span className="listo-ok" aria-hidden="true">
+                  <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M5 12.5l4.5 4.5L19 7.5" />
+                  </svg>
+                </span>
+                <p>{mensajeListo(mia)}</p>
+                {mia.acompanantes && <p className="vacio">Con: {mia.acompanantes}</p>}
+                <button type="button" className="btn btn-o" onClick={empezarEdicion}>
                   Cambiar mi respuesta
                 </button>
               </div>
-            )}
-
-            {evento.telefono && (
-              <p className="rnote">
-                ¿Prefieres confirmar por teléfono? Llama o escribe al <a href={`tel:${evento.telefono.replace(/\s/g, '')}`}>{evento.telefono}</a>.
-              </p>
             )}
           </div>
         </div>

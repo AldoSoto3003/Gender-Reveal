@@ -556,7 +556,7 @@ export function Recuerdos({ d, recargar, avisar }: Props) {
           <div className="sw">
             <div>
               <p className="sw-t">Mostrar la galería en la invitación</p>
-              <p className="sw-d">Mientras esté apagado se ve cerrada, con el aviso “Se abre el 16 de enero”.</p>
+              <p className="sw-d">Mientras esté apagado se ve cerrada, con el aviso de la fecha en que se abre.</p>
             </div>
             <Interruptor on={ev.galeria_visible} label="Mostrar la galería" onClick={() => void alternar('galeria_visible')} />
           </div>

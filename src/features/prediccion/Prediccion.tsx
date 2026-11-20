@@ -3,7 +3,7 @@ import { api, mensajeError } from '../../lib/api';
 import { palabra } from '../../lib/formato';
 import type { Evento, MiPrediccion, Sexo } from '../../lib/types';
 import { Globo } from '../../ui/Globo';
-import { AZUL, ROSA } from '../../ui/SvgDefs';
+import { NINA, NINO } from '../../ui/SvgDefs';
 
 interface Props {
   evento: Evento;
@@ -14,7 +14,7 @@ interface Props {
 function Palomita() {
   return (
     <span className="tick" aria-hidden="true">
-      <svg width="18" height="18" viewBox="0 0 16 16" fill="none" stroke="#FBF8F3" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
         <path d="M3.5 8.5l3 3 6-7" />
       </svg>
     </span>
@@ -62,81 +62,108 @@ export function Prediccion({ evento, mia, onCambio }: Props) {
     }
   }
 
-  const clase = (s: Sexo) => (eleccion === s ? 'bb on' : eleccion ? 'bb off' : 'bb');
+  const opciones: { s: Sexo; color: string; texto: string }[] = [
+    { s: 'nina', color: NINA, texto: 'Niña' },
+    { s: 'nino', color: NINO, texto: 'Niño' },
+  ];
 
   return (
     <section className="sec" id="votar" aria-labelledby="h-voto">
       <div className="wrap">
-        <h2 className="h2" id="h-voto">
-          ¿Qué crees que será?
-        </h2>
+        <div className="sec-cab">
+          <div>
+            <span className="tag">Tu predicción</span>
+            <h2 className="h2" id="h-voto">
+              ¿Qué crees que será?
+            </h2>
+          </div>
+          <p>Elige un globo. Las predicciones se cierran cuando empiece la fiesta.</p>
+        </div>
 
         {cerrado ? (
-          <p className="sub">Las predicciones ya se cerraron. ¡Gracias a todos por participar!</p>
+          <p className="vacio">Las predicciones ya se cerraron. ¡Gracias a todos por participar!</p>
         ) : mia && !editando ? (
-          <div className="thanks" role="status">
-            <p className="thanks-t">¡Gracias, {mia.nombre}!</p>
-            <p className="sub">Tu predicción: {palabra(mia.prediccion)}. El día de la fiesta sabrás si acertaste.</p>
-            <div className="center">
-              <button type="button" className="btn btn-o" onClick={() => setEditando(true)}>
-                Cambiar mi predicción
-              </button>
-            </div>
+          <div className="gracias" role="status">
+            <h3>¡Gracias, {mia.nombre}!</h3>
+            <span className={`chip-voto ${mia.prediccion}`}>
+              <i aria-hidden="true" />
+              Tu predicción: {palabra(mia.prediccion)}
+            </span>
+            <p>
+              Apostaste por {palabra(mia.prediccion)}
+              {mia.peso_kg ? ` y un peso de ${mia.peso_kg} kg` : ''}. El día de la fiesta sabrás si acertaste.
+            </p>
+            <button type="button" className="btn btn-o" onClick={() => setEditando(true)}>
+              Cambiar mi predicción
+            </button>
           </div>
         ) : (
-          <>
-            <p className="sub">Elige un globo. Las predicciones se cierran cuando empiece la fiesta.</p>
-            <form className="form" onSubmit={enviar}>
-              <label className="lbl" htmlFor="nm">
-                Tu nombre
-              </label>
-              <input
-                className="in"
-                id="nm"
-                type="text"
-                autoComplete="name"
-                maxLength={60}
-                placeholder="Nombre y apellido"
-                value={nombre}
-                onChange={(e) => setNombre(e.target.value)}
-              />
-              <div className="pick" role="group" aria-label="Tu predicción">
-                <button type="button" className={clase('nina')} aria-pressed={eleccion === 'nina'} aria-label="Niña" onClick={() => setEleccion('nina')}>
-                  <Globo color={ROSA} texto="NIÑA" colorTexto="#C0504A" />
-                  {eleccion === 'nina' && <Palomita />}
+          <form className="voto" onSubmit={enviar} noValidate>
+            <div className={`elige${eleccion ? ' elegido' : ''}`} role="group" aria-label="Tu predicción">
+              {opciones.map((o) => (
+                <button
+                  key={o.s}
+                  type="button"
+                  className={`opcion ${o.s}`}
+                  aria-pressed={eleccion === o.s}
+                  onClick={() => setEleccion(o.s)}
+                >
+                  {eleccion === o.s && <Palomita />}
+                  <Globo color={o.color} hilos={false} />
+                  <strong>{o.texto}</strong>
+                  <small>Team {palabra(o.s)}</small>
                 </button>
-                <button type="button" className={clase('nino')} aria-pressed={eleccion === 'nino'} aria-label="Niño" onClick={() => setEleccion('nino')}>
-                  <Globo color={AZUL} texto="NIÑO" colorTexto="#34507A" />
-                  {eleccion === 'nino' && <Palomita />}
-                </button>
+              ))}
+            </div>
+            <div className="form">
+              <div className="campo">
+                <label className="lbl" htmlFor="nm">
+                  Tu nombre
+                </label>
+                <input
+                  className="in"
+                  id="nm"
+                  type="text"
+                  autoComplete="name"
+                  maxLength={60}
+                  placeholder="Nombre y apellido"
+                  value={nombre}
+                  onChange={(e) => setNombre(e.target.value)}
+                />
               </div>
-              <div className="opt-row">
-                <div className="kg">
-                  <label className="lbl" htmlFor="kg">
-                    Peso al nacer (opcional)
-                  </label>
-                  <input className="in" id="kg" type="text" inputMode="decimal" placeholder="3.2 kg" value={peso} onChange={(e) => setPeso(e.target.value)} />
-                </div>
+              <div className="campo">
+                <label className="lbl" htmlFor="kg">
+                  Peso al nacer (opcional)
+                </label>
+                <input
+                  className="in"
+                  id="kg"
+                  type="text"
+                  inputMode="decimal"
+                  placeholder="Por ejemplo, 3.2 kg"
+                  value={peso}
+                  onChange={(e) => setPeso(e.target.value)}
+                />
               </div>
-              <div className="center">
+              <div className="fila-envio">
                 <button type="submit" className="btn" disabled={!listo || enviando}>
                   {enviando ? 'Enviando…' : 'Enviar mi predicción'}
                 </button>
-                {error ? (
-                  <p className="err" role="alert">
-                    {error}
-                  </p>
-                ) : (
-                  <p className="hint2">{pista}</p>
-                )}
                 {mia && (
                   <button type="button" className="lnk" onClick={() => setEditando(false)}>
-                    Dejar mi predicción como estaba
+                    Dejarla como estaba
                   </button>
                 )}
               </div>
-            </form>
-          </>
+              {error ? (
+                <p className="err" role="alert">
+                  {error}
+                </p>
+              ) : (
+                <p className="pista">{pista}</p>
+              )}
+            </div>
+          </form>
         )}
       </div>
     </section>

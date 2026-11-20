@@ -5,47 +5,42 @@ https://claude.ai/artifact/P6cko31WDC8zCRJgR8xeek
 
 ## Dirección
 
-Un objeto real sobre una mesa: sobre de papel gris azulado con sello de lacre dorado y, dentro, una tarjeta en papel de acuarela con globos rosa y azul, brillos dorados e hilos color oro. Inspirado en invitaciones impresas de papelería fina, no en una página web típica.
+Un sobre de papel verde salvia con sello de lacre dorado y, dentro, una invitación moderna en un solo lienzo color avena, con globos de acuarela miel (niña) y salvia (niño), brillos dorados e hilos color oro.
 
 **Principios**
 
-- **Realismo antes que decoración:** sombras de varias capas, texturas de papel y luz desde arriba a la izquierda.
-- **Letra a mano solo para títulos y etiquetas**; el texto largo va en una sans legible para invitados mayores.
+- **Un solo lienzo:** nada de hojas o tarjetas encimadas; las secciones se separan con aire, líneas finas y tipografía.
+- **Tipografía grande y moderna para títulos**; el texto largo va en una sans legible para invitados mayores.
 - **El dorado es acento:** brillos, hilos y sello. Nunca en texto.
 - **Una sola gran animación:** la apertura del sobre. El resto del movimiento responde a lo que hace el invitado.
 
 ## Colores
 
+Paleta neutra sin azules ni rosas: avena, olivo, miel (niña) y salvia (niño). Los tokens viven en `src/styles/base.css`.
+
 | Token | Hex | Uso |
 |---|---|---|
-| `--mesa` | `#E6DFD5` | Fondo de la escena |
-| `--papel` | `#F7F4EF` | Fondo de la página |
-| `--papel-tarjeta` | `#FDFCFA` | Tarjetas y fotos impresas |
-| `--tinta` | `#4E5A6E` | Títulos, botones y texto de la tarjeta |
-| `--texto` | `#3F3A35` | Texto de párrafos |
-| `--texto-suave` | `#6B6660` | Textos secundarios |
-| `--globo-rosa` | `#F2A9A0` | Globo de niña |
-| `--globo-azul` | `#9DB6DB` | Globo de niño |
-| `--tinta-rosa` | `#C0504A` | Letras sobre globo rosa y "¡Es niña!" |
-| `--tinta-azul` | `#34507A` | Letras sobre globo azul y "¡Es niño!" |
-| `--oro` | `#C9A24E` | Base del dorado |
-| `--sobre` | `#C9D1D9` | Solapa del sobre |
-| `--sobre-sombra` | `#B6C0CA` | Pliegues del sobre |
+| `--papel` | `#F2F0E3` | Fondo de toda la invitación (un solo lienzo) |
+| `--mesa` | `#E8E6D2` | Bandas sutiles y fondo de la tarjeta estática |
+| `--campo` | olivo al 6% | Fondo de campos, chips y botones secundarios |
+| `--tinta` | `#2C3624` | Títulos, texto y botones |
+| `--texto-suave` | `#59624D` | Textos secundarios |
+| `--globo-nina` | `#E3B23C` | Globo y barra de niña (miel) |
+| `--globo-nino` | `#9FB583` | Globo y barra de niño (salvia) |
+| `--tinta-nina` | `#845F06` | Texto "Niña" y "¡Es niña!" |
+| `--tinta-nino` | `#46652E` | Texto "Niño" y "¡Es niño!" |
+| `--oro` | `#C9A24E` | Brillos, hilos y sello |
+| sobre | `#CDD2B1` | Papel del sobre (salvia) |
 
-Dorado metálico (degradado lineal a 45°): `#9C7424 → #E6C66F → #FFF1C1 → #CFA650 → #9E7528`.
-
-Contraste verificado: `--tinta` sobre `--papel` da 6.1:1, y `--texto-suave` sobre `--papel` pasa AA.
+Las secciones no usan hojas ni tarjetas encimadas: se separan con aire, una línea de 1 px y tipografía.
 
 ## Tipografía
 
-| Rol | Fuente | Tamaño (desktop / móvil) |
+| Rol | Fuente | Tamaño |
 |---|---|---|
-| Títulos de sección | Patrick Hand, mayúsculas, `letter-spacing: .05em` | 54 / 38 px |
-| Etiquetas y botones | Patrick Hand, mayúsculas | 22 / 20 px |
-| Texto | Figtree 400, 500 y 600 | 18 / 17 px |
-| Números grandes | Patrick Hand | 128 / 80 px |
-
-Ambas fuentes vienen de Google Fonts. Ninguna línea de texto en la página baja de 14 px; en la tarjeta, de 13 px en móvil.
+| Títulos y números grandes | Bricolage Grotesque 700–800, `letter-spacing` negativo | 34–60 px (secciones), hasta 220 px (fecha) |
+| Etiquetas | Figtree 600–700, mayúsculas, `letter-spacing: .2em` | 12–13 px |
+| Texto y botones | Figtree 400–600 | 16–18 px |
 
 ## Componentes
 
