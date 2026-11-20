@@ -1,9 +1,11 @@
-import { useEffect, useMemo, useRef, useState, type ChangeEvent } from 'react';
+import { useEffect, useMemo, useRef, useState, type ChangeEvent, type CSSProperties, type ReactNode } from 'react';
 import { api, mensajeError } from '../../lib/api';
-import { aIso, fechaCorta, fechaHoraCorta, fechaLarga, hora, partesLocales, titulo } from '../../lib/formato';
+import { aIso, fechaCorta, fechaHoraCorta, partesLocales, titulo } from '../../lib/formato';
 import { reducirFoto } from '../../lib/imagen';
 import { appleMaps, googleMaps } from '../../lib/mapas';
-import { PRESETS, TEMAS, aplicarTema, coloresDe, contraste, esHex, temaDe } from '../../lib/tema';
+import { PRESETS, TEMAS, coloresDe, contraste, esHex, temaDe } from '../../lib/tema';
+import { SelectorFecha, SelectorHora } from '../../ui/FechaHora';
+import { Tarjeta } from '../../ui/Tarjeta';
 import type { Asistencia, Colores, Evento, FotoHistoria, FotoRecuerdo, Respuesta, Sexo, Tema } from '../../lib/types';
 import { Lluvia } from '../revelacion/Celebracion';
 import type { DatosPanel } from './usePanel';
@@ -270,141 +272,108 @@ function FotoSegura({ src, alt }: { src: string; alt: string }) {
   return <img src={src} alt={alt} onError={() => setRota(true)} />;
 }
 
-const CAMPOS_COLOR: { k: keyof Colores; nombre: string; ayuda: string }[] = [
-  { k: 'nina', nombre: 'Niña', ayuda: 'Globo, barra y textos de niña' },
-  { k: 'nino', nombre: 'Niño', ayuda: 'Globo, barra y textos de niño' },
-  { k: 'tinta', nombre: 'Texto y botones', ayuda: 'Títulos, letras y botones' },
-  { k: 'papel', nombre: 'Fondo', ayuda: 'Color de la página' },
+const CAMPOS_COLOR: { k: keyof Colores; nombre: string }[] = [
+  { k: 'nina', nombre: 'Niña' },
+  { k: 'nino', nombre: 'Niño' },
+  { k: 'tinta', nombre: 'Texto y botones' },
+  { k: 'papel', nombre: 'Fondo' },
 ];
 
-function Muestra({ c }: { c: Colores }) {
+/** Variables CSS para pintar un recuadro con una paleta sin cambiar el resto del panel. */
+function estiloTema(tema: Tema, c: Colores): CSSProperties {
+  return tema === 'personal'
+    ? ({ '--globo-nina': c.nina, '--globo-nino': c.nino, '--tinta': c.tinta, '--papel': c.papel } as CSSProperties)
+    : {};
+}
+
+/** Muestra mini de una paleta: "¿Niña o niño?" con sus colores sobre su fondo. */
+function Muestra({ tema, c }: { tema: Tema; c: Colores }) {
   return (
-    <span className="tema-muestra" style={{ background: c.papel, boxShadow: `inset 0 0 0 1px ${c.tinta}22` }} aria-hidden="true">
-      <i style={{ background: c.nina }} />
-      <i style={{ background: c.nino }} />
-      <b style={{ background: c.tinta }} />
+    <span className="ev-muestra" data-tema={tema} style={{ ...estiloTema(tema, c), background: 'var(--papel)' }} aria-hidden="true">
+      <i style={{ color: 'var(--tinta-nina)' }}>¿Niña</i>
+      <em style={{ color: 'var(--texto-tenue)' }}>o</em>
+      <i style={{ color: 'var(--tinta-nino)' }}>niño?</i>
     </span>
   );
 }
 
-/** Un color: muestra con selector nativo + campo hexadecimal. */
-function CampoColor({ id, nombre, ayuda, valor, onCambio }: { id: string; nombre: string; ayuda: string; valor: string; onCambio: (v: string) => void }) {
+/** Un color: muestra con selector + campo hexadecimal. */
+function CampoColor({ id, nombre, valor, onCambio }: { id: string; nombre: string; valor: string; onCambio: (v: string) => void }) {
   const [texto, setTexto] = useState(valor);
   useEffect(() => setTexto(valor), [valor]);
   return (
-    <div className="color-fila">
-      <div className="color-txt">
+    <div className="ev-color">
+      <input className="ev-color-pick" type="color" aria-label={`${nombre}: elegir color`} value={valor} onChange={(e) => onCambio(e.target.value.toUpperCase())} />
+      <div className="ev-color-txt">
         <label htmlFor={id}>{nombre}</label>
-        <small>{ayuda}</small>
+        <input
+          id={id}
+          className={`ev-color-hex${esHex(texto) ? '' : ' mal'}`}
+          type="text"
+          spellCheck={false}
+          maxLength={7}
+          value={texto}
+          onChange={(e) => {
+            let v = e.target.value.trim();
+            if (v && !v.startsWith('#')) v = `#${v}`;
+            setTexto(v.toUpperCase());
+            if (esHex(v)) onCambio(v.toUpperCase());
+          }}
+          onBlur={() => setTexto(valor)}
+        />
       </div>
-      <input className="color-pick" type="color" aria-label={`${nombre}: elegir color`} value={valor} onChange={(e) => onCambio(e.target.value.toUpperCase())} />
-      <input
-        id={id}
-        className={`color-hex${esHex(texto) ? '' : ' mal'}`}
-        type="text"
-        inputMode="text"
-        spellCheck={false}
-        maxLength={7}
-        value={texto}
-        onChange={(e) => {
-          let v = e.target.value.trim();
-          if (v && !v.startsWith('#')) v = `#${v}`;
-          setTexto(v.toUpperCase());
-          if (esHex(v)) onCambio(v.toUpperCase());
-        }}
-        onBlur={() => setTexto(valor)}
-      />
     </div>
   );
 }
 
-/** Los papás eligen la paleta de la invitación (o arman una propia); el cambio llega a todos al momento. */
-function ElegirTema({ ev, recargar, avisar }: { ev: Evento } & Pick<Props, 'recargar' | 'avisar'>) {
-  const actual = temaDe(ev);
-  const [guardando, setGuardando] = useState<string | null>(null);
-  const [editando, setEditando] = useState(false);
-  const [borrador, setBorrador] = useState<Colores>(() => coloresDe(ev));
-
-  // Mientras editan, el panel entero se pinta con el borrador; al salir vuelve a lo guardado.
-  const guardado = useRef(ev);
-  guardado.current = ev;
-  useEffect(() => {
-    if (!editando) return;
-    aplicarTema('personal', borrador);
-    // Si cambian de sección a medio editar, regresa a la paleta guardada.
-    return () => aplicarTema(temaDe(guardado.current), guardado.current.colores);
-  }, [editando, borrador]);
-  useEffect(() => {
-    if (!editando) aplicarTema(temaDe(ev), ev.colores);
-  }, [editando, ev]);
-
-  async function guardar(cambios: { tema: Tema; colores?: Colores }, nombre: string, clave: string) {
-    if (guardando) return;
-    setGuardando(clave);
-    try {
-      await api.actualizarEvento(cambios);
-      await recargar();
-      setEditando(false);
-      avisar(`Listo: la invitación ahora se ve en ${nombre}.`);
-    } catch (e) {
-      avisar(mensajeError(e));
-    } finally {
-      setGuardando(null);
-    }
-  }
-
-  const bajo = contraste(borrador.tinta, borrador.papel) < 4.5;
+/** Elegir paleta. Solo cambia el borrador del formulario; se publica con "Guardar cambios". */
+function ElegirColores({
+  tema,
+  colores,
+  enUso,
+  onCambio,
+}: {
+  tema: Tema;
+  colores: Colores;
+  enUso: Tema;
+  onCambio: (tema: Tema, colores: Colores) => void;
+}) {
+  const opciones: { valor: Tema; nombre: string; c: Colores }[] = [
+    ...TEMAS.map((t) => ({ valor: t.valor as Tema, nombre: t.nombre, c: t.colores })),
+    { valor: 'personal', nombre: 'Personalizada', c: colores },
+  ];
+  const bajo = tema === 'personal' && contraste(colores.tinta, colores.papel) < 4.5;
 
   return (
-    <div className="card">
-      <p className="h3">Colores de la invitación</p>
-      <p className="help">Cámbienlos cuando quieran para comparar. Todos los invitados ven el cambio al momento.</p>
-      <div className="temas" role="radiogroup" aria-label="Colores de la invitación">
-        {TEMAS.map((t) => (
+    <>
+      <div className="ev-temas" role="radiogroup" aria-label="Colores de la invitación">
+        {opciones.map((o) => (
           <button
-            key={t.valor}
+            key={o.valor}
             type="button"
             role="radio"
-            aria-checked={actual === t.valor && !editando}
-            className={`tema${actual === t.valor && !editando ? ' on' : ''}`}
-            disabled={!!guardando}
-            onClick={() => (actual === t.valor && !editando ? undefined : void guardar({ tema: t.valor }, t.nombre.toLowerCase(), t.valor))}
+            aria-checked={tema === o.valor}
+            className={`ev-tema${tema === o.valor ? ' on' : ''}`}
+            onClick={() => onCambio(o.valor, o.valor === 'personal' ? colores : o.c)}
           >
-            <Muestra c={t.colores} />
-            <span className="tema-txt">
-              <strong>{t.nombre}</strong>
-              <small>{guardando === t.valor ? 'Guardando…' : t.detalle}</small>
+            <Muestra tema={o.valor} c={o.c} />
+            <span className="ev-tema-n">
+              {o.nombre}
+              {enUso === o.valor && <small>En uso</small>}
             </span>
           </button>
         ))}
-        <button
-          type="button"
-          role="radio"
-          aria-checked={actual === 'personal' || editando}
-          className={`tema${actual === 'personal' || editando ? ' on' : ''}`}
-          disabled={!!guardando}
-          onClick={() => {
-            if (!editando) setBorrador(coloresDe(ev));
-            setEditando(true);
-          }}
-        >
-          <Muestra c={actual === 'personal' && !editando && ev.colores ? ev.colores : borrador} />
-          <span className="tema-txt">
-            <strong>Paleta propia</strong>
-            <small>{actual === 'personal' && !editando ? 'La que armaron ustedes · tocar para editar' : 'Ármenla con sus colores'}</small>
-          </span>
-        </button>
       </div>
 
-      {editando && (
-        <div className="paleta">
-          <p className="paleta-t">Empezar desde</p>
-          <div className="presets">
+      {tema === 'personal' && (
+        <div className="ev-paleta">
+          <p className="ev-mini">Empezar desde una combinación</p>
+          <div className="ev-presets">
             {PRESETS.map((p) => {
-              const igual = (Object.keys(p.colores) as (keyof Colores)[]).every((k) => p.colores[k].toUpperCase() === borrador[k].toUpperCase());
+              const igual = (Object.keys(p.colores) as (keyof Colores)[]).every((k) => p.colores[k].toUpperCase() === colores[k].toUpperCase());
               return (
-                <button key={p.nombre} type="button" className={`preset${igual ? ' on' : ''}`} onClick={() => setBorrador({ ...p.colores })}>
-                  <span className="preset-pts" aria-hidden="true">
+                <button key={p.nombre} type="button" className={`ev-preset${igual ? ' on' : ''}`} onClick={() => onCambio('personal', { ...p.colores })}>
+                  <span className="ev-preset-pts" aria-hidden="true">
                     <i style={{ background: p.colores.nina }} />
                     <i style={{ background: p.colores.nino }} />
                     <i style={{ background: p.colores.tinta }} />
@@ -414,57 +383,77 @@ function ElegirTema({ ev, recargar, avisar }: { ev: Evento } & Pick<Props, 'reca
               );
             })}
           </div>
-
-          <div className="colores">
+          <p className="ev-mini">O ajustar cada color</p>
+          <div className="ev-colores">
             {CAMPOS_COLOR.map((c) => (
-              <CampoColor key={c.k} id={`color-${c.k}`} nombre={c.nombre} ayuda={c.ayuda} valor={borrador[c.k]} onCambio={(v) => setBorrador({ ...borrador, [c.k]: v })} />
+              <CampoColor key={c.k} id={`color-${c.k}`} nombre={c.nombre} valor={colores[c.k]} onCambio={(v) => onCambio('personal', { ...colores, [c.k]: v })} />
             ))}
           </div>
-
-          <div className="paleta-prev" style={{ background: borrador.papel, color: borrador.tinta }} aria-hidden="true">
-            <span style={{ color: `color-mix(in srgb, ${borrador.nina} 55%, ${borrador.tinta})` }}>¿Niña</span>
-            <span style={{ opacity: 0.6, fontSize: '0.6em' }}> o </span>
-            <span style={{ color: `color-mix(in srgb, ${borrador.nino} 55%, ${borrador.tinta})` }}>niño?</span>
-            <i style={{ background: borrador.tinta, color: borrador.papel }}>Botón</i>
-          </div>
-          {bajo && <p className="aviso-contraste">El texto casi no contrasta con el fondo; a algunos invitados les costará leerlo. Prueben un texto más oscuro o un fondo más claro.</p>}
-
-          <div className="paleta-acciones">
-            <button type="button" className="btn btn-o btn-sm" onClick={() => setEditando(false)} disabled={!!guardando}>
-              Cancelar
-            </button>
-            <button type="button" className="btn btn-sm" disabled={!!guardando} onClick={() => void guardar({ tema: 'personal', colores: borrador }, 'su paleta propia', 'personal')}>
-              {guardando === 'personal' ? 'Guardando…' : 'Guardar y publicar'}
-            </button>
-          </div>
+          {bajo && <p className="ev-aviso">El texto casi no contrasta con el fondo y a algunos invitados les costará leerlo. Prueben un texto más oscuro o un fondo más claro.</p>}
         </div>
       )}
-
-      <a className="btn btn-o btn-sm tema-ver" href="/" target="_blank" rel="noopener noreferrer">
-        Ver la invitación
-      </a>
-    </div>
+    </>
   );
+}
+
+function Grupo({ titulo, ayuda, children }: { titulo: string; ayuda: string; children: ReactNode }) {
+  return (
+    <section className="ev-grupo">
+      <div className="ev-grupo-cab">
+        <h2>{titulo}</h2>
+        <p>{ayuda}</p>
+      </div>
+      <div className="ev-grupo-campos">{children}</div>
+    </section>
+  );
+}
+
+interface FormEvento {
+  fecha: string;
+  hora: string;
+  papas: string;
+  lugar: string;
+  direccion: string;
+  telefono: string;
+  nota: string;
+  tema: Tema;
+  colores: Colores;
+}
+
+function desdeEvento(ev: Evento): FormEvento {
+  const p = partesLocales(ev.fecha_hora);
+  return {
+    fecha: p.fecha,
+    hora: p.hora,
+    papas: ev.nombres_papas,
+    lugar: ev.lugar,
+    direccion: ev.direccion,
+    telefono: ev.telefono,
+    nota: ev.nota,
+    tema: temaDe(ev),
+    colores: coloresDe(ev),
+  };
 }
 
 export function DatosEvento({ d, recargar, avisar }: Props) {
   const ev = d.evento;
-  const [f, setF] = useState<{ fecha: string; hora: string; lugar: string; direccion: string; nota: string; papas: string; telefono: string } | null>(
-    null,
-  );
+  const [f, setF] = useState<FormEvento | null>(null);
+  const [guardado, setGuardado] = useState<FormEvento | null>(null);
   const [guardando, setGuardando] = useState(false);
 
   useEffect(() => {
     if (ev && !f) {
-      const p = partesLocales(ev.fecha_hora);
-      setF({ fecha: p.fecha, hora: p.hora, lugar: ev.lugar, direccion: ev.direccion, nota: ev.nota, papas: ev.nombres_papas, telefono: ev.telefono });
+      const x = desdeEvento(ev);
+      setF(x);
+      setGuardado(x);
     }
   }, [ev, f]);
 
-  if (!ev || !f) return null;
-  const set = (k: keyof typeof f) => (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setF({ ...f, [k]: e.target.value });
-  const iso = f.fecha && f.hora ? aIso(f.fecha, f.hora) : ev.fecha_hora;
-  const dir = f.direccion.trim() || 'Dirección del lugar';
+  if (!ev || !f || !guardado) return null;
+  const cambios = JSON.stringify(f) !== JSON.stringify(guardado);
+  const set = (k: keyof FormEvento) => (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setF({ ...f, [k]: e.target.value });
+  const iso = aIso(f.fecha, f.hora);
+  const vista: Evento = { ...ev, fecha_hora: iso, lugar: f.lugar.trim(), direccion: f.direccion.trim(), nombres_papas: f.papas.trim(), telefono: f.telefono.trim() };
 
   async function guardar() {
     if (!f) return;
@@ -477,8 +466,11 @@ export function DatosEvento({ d, recargar, avisar }: Props) {
         nota: f.nota.trim(),
         nombres_papas: f.papas.trim(),
         telefono: f.telefono.trim(),
+        tema: f.tema,
+        ...(f.tema === 'personal' ? { colores: f.colores } : {}),
       });
       await recargar();
+      setGuardado(f);
       avisar('Cambios guardados. La invitación ya está actualizada.');
     } catch (e) {
       avisar(mensajeError(e));
@@ -492,77 +484,96 @@ export function DatosEvento({ d, recargar, avisar }: Props) {
       <div className="top">
         <div>
           <h1 className="h1">Datos del evento</h1>
-          <p className="lede">Lo que cambien aquí se actualiza en la invitación al guardar.</p>
+          <p className="lede">Editen lo que ven los invitados. Nada cambia en la invitación hasta que presionen “Guardar cambios”.</p>
         </div>
-        <button type="button" className="btn" disabled={guardando} onClick={guardar}>
-          {guardando ? 'Guardando…' : 'Guardar cambios'}
-        </button>
       </div>
-      <div className="two" style={{ marginTop: 0 }}>
-        <div className="card">
-          <div className="grid2">
+
+      <div className="evento">
+        <div className="card ev-form">
+          <Grupo titulo="Fecha y hora" ayuda="En hora de Tijuana.">
             <div className="field">
-              <label htmlFor="f-fecha">Fecha</label>
-              <input id="f-fecha" type="date" value={f.fecha} onChange={set('fecha')} />
+              <span className="ev-lbl">Fecha</span>
+              <SelectorFecha valor={f.fecha} onCambio={(fecha) => setF({ ...f, fecha })} />
             </div>
             <div className="field">
-              <label htmlFor="f-hora">Hora (Tijuana)</label>
-              <input id="f-hora" type="time" value={f.hora} onChange={set('hora')} />
+              <span className="ev-lbl">Hora</span>
+              <SelectorHora valor={f.hora} onCambio={(hora) => setF({ ...f, hora })} />
             </div>
-            <div className="field full">
-              <label htmlFor="f-papas">Sus nombres, como aparecen en la tarjeta</label>
+          </Grupo>
+
+          <Grupo titulo="Quiénes invitan" ayuda="Así aparecen sus nombres en la invitación y en la tarjeta.">
+            <div className="field">
+              <label htmlFor="f-papas">Sus nombres</label>
               <input id="f-papas" type="text" placeholder="Por ejemplo, Ana y Luis" value={f.papas} onChange={set('papas')} />
             </div>
-            <div className="field full">
+          </Grupo>
+
+          <Grupo titulo="Lugar" ayuda="Con la dirección se arman los botones de Google Maps y Apple Maps.">
+            <div className="field">
               <label htmlFor="f-lugar">Nombre del lugar</label>
               <input id="f-lugar" type="text" placeholder="Por ejemplo, Jardín Las Flores" value={f.lugar} onChange={set('lugar')} />
             </div>
-            <div className="field full">
+            <div className="field">
               <label htmlFor="f-dir">Dirección</label>
               <input id="f-dir" type="text" placeholder="Calle, número, colonia y ciudad" value={f.direccion} onChange={set('direccion')} />
-              <span className="help">Con esta dirección se arman los botones de Google Maps y Apple Maps.</span>
             </div>
-            <div className="field full">
-              <label htmlFor="f-tel">Teléfono para confirmar (opcional)</label>
+            {f.direccion.trim() && (
+              <div className="ev-mapas">
+                <span className="ev-mini">Probar:</span>
+                <a className="btn btn-o btn-sm" href={googleMaps(f.direccion.trim())} target="_blank" rel="noopener noreferrer">
+                  Google Maps
+                </a>
+                <a className="btn btn-o btn-sm" href={appleMaps(f.direccion.trim())} target="_blank" rel="noopener noreferrer">
+                  Apple Maps
+                </a>
+              </div>
+            )}
+          </Grupo>
+
+          <Grupo titulo="Contacto y nota" ayuda="Opcionales. El teléfono es para quien prefiera confirmar llamando.">
+            <div className="field">
+              <label htmlFor="f-tel">Teléfono</label>
               <input id="f-tel" type="tel" placeholder="Para quien prefiera llamar" value={f.telefono} onChange={set('telefono')} />
             </div>
-            <div className="field full">
-              <label htmlFor="f-nota">Nota para los invitados (opcional)</label>
+            <div className="field">
+              <label htmlFor="f-nota">Nota para los invitados</label>
               <textarea id="f-nota" rows={3} placeholder="Por ejemplo, hay estacionamiento en la entrada" value={f.nota} onChange={set('nota')} />
             </div>
-          </div>
+          </Grupo>
+
+          <Grupo titulo="Colores" ayuda="Elijan una paleta o armen la suya. La vista previa cambia al momento.">
+            <ElegirColores tema={f.tema} colores={f.colores} enUso={guardado.tema} onCambio={(tema, colores) => setF({ ...f, tema, colores })} />
+          </Grupo>
         </div>
-        <div>
-          <ElegirTema ev={ev} recargar={recargar} avisar={avisar} />
-          <div className="card">
-            <p className="h3">Así se verá en la tarjeta</p>
-            <div className="prev">
-              <p>
-                {fechaLarga(iso).toUpperCase()}, {hora(iso).toUpperCase()}
-              </p>
-              <p>{(f.lugar || 'Lugar por confirmar').toUpperCase()}</p>
-              {f.direccion && <p>{f.direccion.toUpperCase()}</p>}
-            </div>
+
+        <aside className="card ev-prev">
+          <p className="h3">Vista previa</p>
+          <div className="ev-prev-marco" data-tema={f.tema} style={estiloTema(f.tema, f.colores)}>
+            <Tarjeta evento={vista} className="ev-prev-tarjeta" />
           </div>
-          <div className="card">
-            <p className="h3">Botones de ubicación</p>
-            <div className="linkbox">
-              <div className="linkrow">
-                <code>{googleMaps(dir)}</code>
-                <a className="btn btn-o btn-sm" href={googleMaps(dir)} target="_blank" rel="noopener noreferrer">
-                  Probar
-                </a>
-              </div>
-              <div className="linkrow">
-                <code>{appleMaps(dir)}</code>
-                <a className="btn btn-o btn-sm" href={appleMaps(dir)} target="_blank" rel="noopener noreferrer">
-                  Probar
-                </a>
-              </div>
-            </div>
+          <p className="muted">{cambios ? 'Así quedará cuando guarden.' : 'Así se ve ahora.'}</p>
+          <div className="ev-prev-links">
+            <a className="btn btn-o btn-sm" href="/" target="_blank" rel="noopener noreferrer">
+              Ver la invitación
+            </a>
+            <a className="btn btn-o btn-sm" href="/tarjeta" target="_blank" rel="noopener noreferrer">
+              Abrir tarjeta
+            </a>
           </div>
-        </div>
+        </aside>
       </div>
+
+      {cambios && (
+        <div className="ev-guardar" role="region" aria-label="Cambios sin guardar">
+          <span>Tienen cambios sin guardar</span>
+          <button type="button" className="btn btn-o btn-sm" disabled={guardando} onClick={() => setF(guardado)}>
+            Descartar
+          </button>
+          <button type="button" className="btn btn-sm" disabled={guardando} onClick={() => void guardar()}>
+            {guardando ? 'Guardando…' : 'Guardar cambios'}
+          </button>
+        </div>
+      )}
     </>
   );
 }

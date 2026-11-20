@@ -1,4 +1,5 @@
-:root {
+:root,
+[data-tema='neutro'] {
   /* Paleta neutra: avena, olivo, miel (niña) y salvia (niño). Sin azules ni rosas. */
   --mesa: #e8e6d2;
   --papel: #f2f0e3;
@@ -31,7 +32,8 @@
 }
 
 /* Tema "Rosa y azul": mismos componentes, otra paleta. Se activa desde el panel (eventos.tema). */
-:root[data-tema='clasico'] {
+:root[data-tema='clasico'],
+[data-tema='clasico'] {
   --mesa: #e9e2d8;
   --papel: #f7f4ef;
   --papel-tarjeta: #fdfcfa;
@@ -57,9 +59,10 @@
   --sombra: 60, 52, 44;
 }
 
-:root[data-tema='personal'] {
+:root[data-tema='personal'],
+[data-tema='personal'] {
   /* Paleta armada en el panel: --globo-nina, --globo-nino, --tinta y --papel llegan como estilo
-     en <html> (lib/tema.ts). Todo lo demás se deriva de esos 4 colores. */
+     en <html> (lib/tema.ts) o en el recuadro de vista previa del panel. Todo lo demás se deriva de esos 4 colores. */
   --tinta-fuerte: color-mix(in srgb, var(--tinta) 80%, black);
   --texto: var(--tinta);
   --texto-suave: color-mix(in srgb, var(--tinta) 78%, var(--papel));
