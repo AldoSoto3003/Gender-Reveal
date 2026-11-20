@@ -179,3 +179,28 @@ El plan gratuito pausa proyectos sin actividad por 7 días. Con el VPS, agrega u
 ## 8. Monitoreo
 
 Da de alta `https://revelacion.aldosoto.dev` en un monitor gratuito (por ejemplo, UptimeRobot) para recibir un aviso si el VPS se cae, sobre todo el día del evento.
+
+## Avisos por correo de confirmaciones
+
+Cada vez que alguien confirma, cambia o rechaza su asistencia, llega un correo a todos los admins del evento (los correos de la tabla `admins`). Lo arma la Edge Function [`avisar-asistencia`](../supabase/functions/avisar-asistencia/index.ts) y lo dispara un trigger de `asistencias` ([migración](../supabase/migrations/20261122000000_avisos_asistencia.sql)). Si el correo falla, la confirmación del invitado se guarda igual.
+
+### Configurar Resend (una sola vez)
+
+1. Crea una cuenta en [resend.com](https://resend.com) (plan gratis: 3,000 correos al mes).
+2. En *Domains → Add domain* agrega `aldosoto.dev` y copia los registros que te muestra (un MX y dos TXT, para el subdominio `send` y la llave DKIM) al DNS de GoDaddy. Espera a que Resend lo marque como **Verified**.
+3. En *API Keys → Create API key* crea una con permiso **Sending access**.
+4. Guárdala como secreto en Supabase (desde la carpeta del proyecto):
+
+   ```bash
+   npx supabase secrets set RESEND_API_KEY=re_tu_llave
+   ```
+
+Opcional: `AVISO_REMITENTE` (por defecto `Revelación <avisos@aldosoto.dev>`) y `PANEL_URL`.
+
+### Actualizar la función
+
+```bash
+npx supabase functions deploy avisar-asistencia --use-api
+```
+
+Si un aviso no llega, revisa los logs en *Supabase → Edge Functions → avisar-asistencia → Logs*.
